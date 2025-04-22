@@ -1,50 +1,37 @@
-# Welcome to your Expo app 👋
+# 🐾 わんこログ - 犬の健康記録アプリ
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+「わんこログ」は、愛犬の健康状態を手軽に記録・管理できるモバイルアプリです。  
+日々の体調、通院履歴、ワクチン接種、食事、排泄、運動などを一元管理することで、飼い主さんが愛犬の健康をしっかり守れるようにサポートします。
 
-## Get started
+## 🎯 主な機能
 
-1. Install dependencies
+-   🩺 健康記録（体重、食事、排泄、睡眠、体調メモなど）
+-   📅 カレンダーで日々の記録を一覧表示
+-   💉 通院履歴・ワクチン接種履歴の管理
+-   📷 写真付きで記録が可能
+-   🔔 定期通知（ワクチン予定、フィラリア薬など）
 
-   ```bash
-   npm install
-   ```
+## 🛠️ 技術スタック
 
-2. Start the app
+-   フレームワーク: React Native (Expo 予定)
+-   状態管理: Zustand or Jotai（検討中）
+-   バックエンド: Firebase / Supabase（検討中）
+-   デザイン: Tailwind（NativeWind） + Expo Router
 
-   ```bash
-    npx expo start
-   ```
+## 🐶 対象ユーザー
 
-In the output, you'll find options to open the app in a
+-   犬を飼っているすべての人
+-   特に体調管理が必要なシニア犬の飼い主
+-   多頭飼いしているユーザー（多頭対応予定）
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 💰 今後のマネタイズ検討
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+-   プレミアムプラン（月額/年額課金）
+-   広告（無料プランに表示）
+-   獣医師監修の健康アドバイス記事（月額購読）
 
-## Get a fresh project
+## 📆 今後の予定
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+-   MVP 開発（健康記録＋カレンダー＋通院履歴）
+-   ストア公開（iOS / Android）
+-   ユーザーインタビュー＋フィードバック反映
