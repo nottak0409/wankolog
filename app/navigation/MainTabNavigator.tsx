@@ -1,70 +1,75 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { CalendarScreen } from "../screens/CalendarScreen";
 import HomeScreen from "../screens/HomeScreen";
-import CalendarScreen from "../screens/CalendarScreen";
 import HistoryScreen from "../screens/HistoryScreen";
-import SettingsScreen from "../screens/SettingsScreen";
 import PetProfileScreen from "../screens/PetProfileScreen";
+import SettingsScreen from "../screens/SettingsScreen";
+import theme from "../constants/theme";
 
 const Tab = createBottomTabNavigator();
 
-export default function MainTabNavigator() {
+const MainTabNavigator = () => {
 	return (
 		<Tab.Navigator
 			screenOptions={{
-				tabBarActiveTintColor: "#8b4513",
-				tabBarInactiveTintColor: "#a67c52",
-				tabBarStyle: {
-					backgroundColor: "#fff9f0",
-					borderTopColor: "#ede0d4",
-				},
+				tabBarActiveTintColor: theme.colors.primary,
+				tabBarInactiveTintColor: theme.colors.text.secondary,
+				headerShown: false,
 			}}
 		>
 			<Tab.Screen
-				name="ホーム"
+				name="Home"
 				component={HomeScreen}
 				options={{
-					tabBarIcon: ({ color }) => (
-						<Ionicons name="home" size={26} color={color} />
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="home" size={size} color={color} />
 					),
+					tabBarLabel: "ホーム",
 				}}
 			/>
 			<Tab.Screen
-				name="カレンダー"
+				name="Calendar"
 				component={CalendarScreen}
 				options={{
-					tabBarIcon: ({ color }) => (
-						<Ionicons name="calendar" size={26} color={color} />
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="calendar" size={size} color={color} />
 					),
+					tabBarLabel: "カレンダー",
 				}}
 			/>
 			<Tab.Screen
-				name="履歴"
+				name="History"
 				component={HistoryScreen}
 				options={{
-					tabBarIcon: ({ color }) => (
-						<Ionicons name="time" size={26} color={color} />
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="time" size={size} color={color} />
 					),
+					tabBarLabel: "履歴",
 				}}
 			/>
 			<Tab.Screen
-				name="設定"
-				component={SettingsScreen}
-				options={{
-					tabBarIcon: ({ color }) => (
-						<Ionicons name="settings" size={26} color={color} />
-					),
-				}}
-			/>
-			<Tab.Screen
-				name="プロフィール"
+				name="PetProfile"
 				component={PetProfileScreen}
 				options={{
-					tabBarIcon: ({ color }) => (
-						<Ionicons name="paw" size={26} color={color} />
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="paw" size={size} color={color} />
 					),
+					tabBarLabel: "プロフィール",
+				}}
+			/>
+			<Tab.Screen
+				name="Settings"
+				component={SettingsScreen}
+				options={{
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="settings" size={size} color={color} />
+					),
+					tabBarLabel: "設定",
 				}}
 			/>
 		</Tab.Navigator>
 	);
-}
+};
+
+export default MainTabNavigator;

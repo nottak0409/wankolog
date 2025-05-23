@@ -1,42 +1,63 @@
-// 今週の記録カード（横スクロール）
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { colors, spacing, shadow, borderRadius } from "../../constants/theme";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
+import theme from "../../constants/theme";
 
-type DaySummary = {
-	date: string; // "5/20" など
-	weight?: number;
-	mealsCount?: number;
-	poopsCount?: number;
-	exerciseMinutes?: number;
+export type WeekData = {
+	date: string;
+	weight: number;
+	mealsCount: number;
+	poopsCount: number;
+	exerciseMinutes: number;
 };
 
 type WeeklySummaryCardProps = {
-	week: DaySummary[];
+	data: WeekData[];
 };
 
-const WeeklySummaryCard: React.FC<WeeklySummaryCardProps> = ({ week }) => {
+const WeeklySummaryCard: React.FC<WeeklySummaryCardProps> = ({ data }) => {
+	console.log(data);
+	if (!data || data.length === 0) {
+		return (
+			<View style={styles.container}>
+				<Text style={styles.title}>今週の記録</Text>
+				<Text style={styles.noDataText}>記録がありません</Text>
+			</View>
+		);
+	}
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>今週の記録</Text>
 			<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-				{week.map((day, idx) => (
-					<View style={styles.dayCard} key={idx}>
-						<Text style={styles.date}>{day.date}</Text>
-						<Text style={styles.item}>
-							📏 {day.weight ?? "--"}kg
-						</Text>
-						<Text style={styles.item}>
-							🍽 {day.mealsCount ?? "--"}回
-						</Text>
-						<Text style={styles.item}>
-							💩 {day.poopsCount ?? "--"}回
-						</Text>
-						<Text style={styles.item}>
-							🏃‍♂️ {day.exerciseMinutes ?? "--"}分
-						</Text>
-					</View>
-				))}
+				<View style={styles.cardsContainer}>
+					{data.map((day, index) => (
+						<View key={day.date} style={styles.dayCard}>
+							<Text style={styles.dateText}>{day.date}</Text>
+							<View style={styles.dataRow}>
+								<Text style={styles.label}>体重</Text>
+								<Text style={styles.value}>{day.weight}kg</Text>
+							</View>
+							<View style={styles.dataRow}>
+								<Text style={styles.label}>食事</Text>
+								<Text style={styles.value}>
+									{day.mealsCount}回
+								</Text>
+							</View>
+							<View style={styles.dataRow}>
+								<Text style={styles.label}>うんち</Text>
+								<Text style={styles.value}>
+									{day.poopsCount}回
+								</Text>
+							</View>
+							<View style={styles.dataRow}>
+								<Text style={styles.label}>運動</Text>
+								<Text style={styles.value}>
+									{day.exerciseMinutes}分
+								</Text>
+							</View>
+						</View>
+					))}
+				</View>
 			</ScrollView>
 		</View>
 	);
@@ -44,47 +65,54 @@ const WeeklySummaryCard: React.FC<WeeklySummaryCardProps> = ({ week }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		marginVertical: spacing.md,
-		backgroundColor: colors.background.secondary,
-		borderRadius: borderRadius.lg,
-		padding: spacing.md,
-		borderWidth: 1,
-		borderColor: colors.border.main,
-		...shadow.md,
+		backgroundColor: theme.colors.background.main,
+		borderRadius: theme.borderRadius.md,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadows.sm,
 	},
 	title: {
-		fontSize: 18,
+		fontSize: 16,
 		fontWeight: "600",
-		marginBottom: spacing.md,
-		color: colors.text.secondary,
-		textAlign: "center",
+		color: theme.colors.text.primary,
+		marginBottom: theme.spacing.md,
+	},
+	cardsContainer: {
+		flexDirection: "row",
+		gap: theme.spacing.sm,
 	},
 	dayCard: {
-		backgroundColor: colors.background.main,
-		borderRadius: borderRadius.lg,
-		padding: spacing.md,
-		marginRight: spacing.md,
-		minWidth: 110,
-		alignItems: "center",
-		borderWidth: 1,
-		borderColor: colors.border.main,
-		...shadow.sm,
+		width: 140,
+		backgroundColor: theme.colors.background.secondary,
+		borderRadius: theme.borderRadius.sm,
+		padding: theme.spacing.md,
 	},
-	date: {
+	dateText: {
 		fontSize: 14,
 		fontWeight: "600",
-		marginBottom: spacing.sm,
-		color: colors.text.secondary,
-		backgroundColor: colors.background.secondary,
-		paddingVertical: spacing.xs,
-		paddingHorizontal: spacing.sm,
-		borderRadius: borderRadius.md,
+		color: theme.colors.primary,
+		marginBottom: theme.spacing.sm,
 	},
-	item: {
-		fontSize: 13,
-		color: colors.secondary,
-		marginBottom: spacing.xs,
-		lineHeight: 20,
+	dataRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginBottom: theme.spacing.xs,
+	},
+	label: {
+		fontSize: 12,
+		color: theme.colors.text.secondary,
+	},
+	value: {
+		fontSize: 12,
+		fontWeight: "600",
+		color: theme.colors.text.primary,
+	},
+	noDataText: {
+		fontSize: 14,
+		color: theme.colors.text.secondary,
+		textAlign: "center",
+		padding: theme.spacing.md,
 	},
 });
 

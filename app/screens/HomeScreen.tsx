@@ -1,116 +1,108 @@
+import React from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
-import { Text } from "react-native";
 import DailySummaryCard from "../components/molecules/DailySummaryCard";
 import WeeklySummaryCard from "../components/molecules/WeeklySummaryCard";
 import NotificationBanner from "../components/molecules/NotificationBanner";
-import PetProfileCard from "../components/molecules/PetProfileCard";
+import theme from "../constants/theme";
+import type { WeekData } from "../components/molecules/WeeklySummaryCard";
 
-export default function HomeScreen() {
-	// 仮データ（後でReduxやAPI連携に差し替え）
-	const todaySummary = {
-		weight: 6.2,
+const mockWeekData: WeekData[] = [
+	{
+		date: "5/17",
+		weight: 5.2,
+		mealsCount: 2,
+		poopsCount: 2,
+		exerciseMinutes: 30,
+	},
+	{
+		date: "5/18",
+		weight: 5.1,
+		mealsCount: 2,
+		poopsCount: 1,
+		exerciseMinutes: 45,
+	},
+	{
+		date: "5/19",
+		weight: 5.2,
+		mealsCount: 2,
+		poopsCount: 2,
+		exerciseMinutes: 20,
+	},
+	{
+		date: "5/20",
+		weight: 5.1,
+		mealsCount: 2,
+		poopsCount: 2,
+		exerciseMinutes: 40,
+	},
+	{
+		date: "5/21",
+		weight: 5.2,
 		mealsCount: 2,
 		poopsCount: 1,
 		exerciseMinutes: 30,
-	};
+	},
+	{
+		date: "5/22",
+		weight: 5.1,
+		mealsCount: 2,
+		poopsCount: 2,
+		exerciseMinutes: 35,
+	},
+	{
+		date: "5/23",
+		weight: 5.2,
+		mealsCount: 2,
+		poopsCount: 2,
+		exerciseMinutes: 30,
+	},
+];
 
-	const weekSummary = [
-		{
-			date: "5/18",
-			weight: 6.1,
-			mealsCount: 2,
-			poopsCount: 1,
-			exerciseMinutes: 25,
-		},
-		{
-			date: "5/19",
-			weight: 6.2,
-			mealsCount: 2,
-			poopsCount: 1,
-			exerciseMinutes: 30,
-		},
-		{
-			date: "5/20",
-			weight: 6.2,
-			mealsCount: 2,
-			poopsCount: 2,
-			exerciseMinutes: 20,
-		},
-		{
-			date: "5/21",
-			weight: 6.3,
-			mealsCount: 2,
-			poopsCount: 1,
-			exerciseMinutes: 35,
-		},
-		{
-			date: "5/22",
-			weight: 6.2,
-			mealsCount: 2,
-			poopsCount: 1,
-			exerciseMinutes: 30,
-		},
-		{
-			date: "5/23",
-			weight: 6.2,
-			mealsCount: 2,
-			poopsCount: 1,
-			exerciseMinutes: 30,
-		},
-		{ date: "5/24" },
-	];
-
-	const notifications = [
-		{
-			id: "1",
-			message: "ワクチン接種の予定日が近づいています",
-			date: "5/24 09:00",
-		},
-		{ id: "2", message: "ごはんの記録を忘れずに！", date: "5/23 18:00" },
-	];
+const HomeScreen = () => {
+	const todayData =
+		mockWeekData.length > 0
+			? mockWeekData[mockWeekData.length - 1]
+			: {
+					weight: undefined,
+					mealsCount: 0,
+					poopsCount: 0,
+					exerciseMinutes: 0,
+			  };
 
 	return (
-		<ScrollView
-			style={styles.container}
-			contentContainerStyle={styles.content}
-		>
-			<Text style={styles.header}>わんこログ 🐶</Text>
-			<PetProfileCard
-				name="ポチ"
-				imageUrl="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
-			/>
-			<DailySummaryCard {...todaySummary} />
-			<WeeklySummaryCard week={weekSummary} />
-			<NotificationBanner notifications={notifications} />
-		</ScrollView>
+		<View style={styles.container}>
+			<ScrollView style={styles.content}>
+				<DailySummaryCard
+					weight={todayData.weight}
+					mealsCount={todayData.mealsCount}
+					poopsCount={todayData.poopsCount}
+					exerciseMinutes={todayData.exerciseMinutes}
+				/>
+				<WeeklySummaryCard data={mockWeekData} />
+				<NotificationBanner
+					notifications={[
+						{
+							id: "1",
+							message:
+								"来週の火曜日に3種混合ワクチンの接種日です",
+							date: "5/30 10:00",
+						},
+					]}
+				/>
+			</ScrollView>
+		</View>
 	);
-}
+};
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#fff9f0",
+		backgroundColor: theme.colors.background.secondary,
 	},
 	content: {
-		padding: 20,
-		paddingBottom: 40,
-	},
-	header: {
-		fontSize: 24,
-		fontWeight: "600",
-		marginBottom: 16,
-		color: "#6b3c11",
-		textAlign: "center",
-		backgroundColor: "#fff",
-		marginHorizontal: -20,
-		marginTop: -20,
-		paddingVertical: 16,
-		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		shadowOffset: { width: 0, height: 2 },
-		elevation: 2,
+		flex: 1,
+		padding: theme.spacing.md,
 	},
 });
+
+export default HomeScreen;

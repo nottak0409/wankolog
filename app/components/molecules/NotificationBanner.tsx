@@ -1,12 +1,12 @@
-// お知らせ・通知バナー
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { colors, spacing, shadow, borderRadius } from "../../constants/theme";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import theme from "../../constants/theme";
 
 type Notification = {
 	id: string;
 	message: string;
-	date: string; // "5/23 09:00" など
+	date: string;
 };
 
 type NotificationBannerProps = {
@@ -16,15 +16,39 @@ type NotificationBannerProps = {
 const NotificationBanner: React.FC<NotificationBannerProps> = ({
 	notifications,
 }) => {
-	if (!notifications.length) return null;
+	if (!notifications || notifications.length === 0) {
+		return null;
+	}
+
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>お知らせ・通知</Text>
-			{notifications.map((n) => (
-				<View style={styles.banner} key={n.id}>
-					<Text style={styles.message}>{n.message}</Text>
-					<Text style={styles.date}>{n.date}</Text>
-				</View>
+			{notifications.map((notification) => (
+				<TouchableOpacity
+					key={notification.id}
+					style={styles.notificationItem}
+					onPress={() =>
+						console.log(`Notification ${notification.id} pressed`)
+					}
+				>
+					<View style={styles.iconContainer}>
+						<Ionicons
+							name="notifications"
+							size={24}
+							color={theme.colors.primary}
+						/>
+					</View>
+					<View style={styles.textContainer}>
+						<Text style={styles.message}>
+							{notification.message}
+						</Text>
+						<Text style={styles.date}>{notification.date}</Text>
+					</View>
+					<Ionicons
+						name="chevron-forward"
+						size={24}
+						color={theme.colors.text.secondary}
+					/>
+				</TouchableOpacity>
 			))}
 		</View>
 	);
@@ -32,45 +56,41 @@ const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
 const styles = StyleSheet.create({
 	container: {
-		marginVertical: spacing.md,
-		backgroundColor: colors.background.secondary,
-		borderRadius: borderRadius.lg,
-		padding: spacing.md,
-		borderWidth: 1,
-		borderColor: colors.border.main,
-		...shadow.md,
+		backgroundColor: theme.colors.background.main,
+		borderRadius: theme.borderRadius.md,
+		padding: theme.spacing.md,
+		marginBottom: theme.spacing.md,
+		...theme.shadows.sm,
 	},
-	title: {
-		fontSize: 18,
-		fontWeight: "600",
-		marginBottom: spacing.md,
-		color: colors.text.secondary,
-		textAlign: "center",
+	iconContainer: {
+		width: 40,
+		height: 40,
+		borderRadius: 20,
+		backgroundColor: theme.colors.background.secondary,
+		justifyContent: "center",
+		alignItems: "center",
+		marginRight: theme.spacing.md,
 	},
-	banner: {
-		backgroundColor: colors.background.main,
-		borderRadius: borderRadius.lg,
-		padding: spacing.md,
-		marginBottom: spacing.sm,
-		borderWidth: 1,
-		borderColor: colors.border.main,
-		...shadow.sm,
+	textContainer: {
+		flex: 1,
 	},
 	message: {
 		fontSize: 14,
-		color: colors.text.primary,
-		marginBottom: spacing.xs,
-		lineHeight: 20,
+		fontWeight: "600",
+		color: theme.colors.text.primary,
+		marginBottom: theme.spacing.xs,
 	},
 	date: {
 		fontSize: 12,
-		color: colors.text.secondary,
-		textAlign: "right",
-		backgroundColor: colors.background.secondary,
-		paddingVertical: spacing.xs,
-		paddingHorizontal: spacing.sm,
-		borderRadius: borderRadius.md,
-		alignSelf: "flex-end",
+		color: theme.colors.text.secondary,
+	},
+	notificationItem: {
+		flexDirection: "row",
+		alignItems: "center",
+		paddingVertical: theme.spacing.sm,
+		borderBottomWidth: 1,
+		borderBottomColor: theme.colors.border.main,
+		marginBottom: theme.spacing.sm,
 	},
 });
 

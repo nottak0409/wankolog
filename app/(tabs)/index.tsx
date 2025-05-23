@@ -58,7 +58,13 @@ export default function HomeScreen() {
 			poopsCount: 1,
 			exerciseMinutes: 30,
 		},
-		{ date: "5/24" },
+		{
+			date: "5/24",
+			weight: 6.2,
+			mealsCount: 2,
+			poopsCount: 1,
+			exerciseMinutes: 30,
+		},
 	];
 
 	const notifications = [
@@ -80,7 +86,7 @@ export default function HomeScreen() {
 				imageUrl="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
 			/>
 			<DailySummaryCard {...todaySummary} />
-			<WeeklySummaryCard week={weekSummary} />
+			<WeeklySummaryCard data={weekSummary} />
 			<NotificationBanner notifications={notifications} />
 		</ScrollView>
 	);

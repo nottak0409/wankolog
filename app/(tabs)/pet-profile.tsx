@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
-import { colors, shadow, spacing } from "../constants/theme";
+import { colors, shadows, spacing } from "../constants/theme";
 
 export default function PetProfileScreen() {
 	// 仮データ（後でReduxやAPI連携に差し替え）
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
 		overflow: "hidden",
 		marginBottom: spacing.md,
 		backgroundColor: colors.background.main,
-		...shadow.md,
+		...shadows.md,
 	},
 	image: {
 		width: "100%",

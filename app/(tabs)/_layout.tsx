@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
-import { colors, shadow } from "../constants/theme";
+import { colors, shadows } from "../constants/theme";
 
 export default function TabLayout() {
 	return (
@@ -14,7 +14,7 @@ export default function TabLayout() {
 				},
 				headerStyle: {
 					backgroundColor: colors.background.main,
-					...shadow.sm,
+					...shadows.sm,
 				},
 				headerTitleStyle: {
 					color: colors.text.primary,
