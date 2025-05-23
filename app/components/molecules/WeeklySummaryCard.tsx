@@ -1,6 +1,7 @@
 // 今週の記録カード（横スクロール）
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { colors, spacing, shadow, borderRadius } from "../../constants/theme";
 
 type DaySummary = {
 	date: string; // "5/20" など
@@ -43,54 +44,46 @@ const WeeklySummaryCard: React.FC<WeeklySummaryCardProps> = ({ week }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		marginVertical: 16,
-		backgroundColor: "#fff9f0",
-		borderRadius: 24,
-		padding: 16,
+		marginVertical: spacing.md,
+		backgroundColor: colors.background.secondary,
+		borderRadius: borderRadius.lg,
+		padding: spacing.md,
 		borderWidth: 1,
-		borderColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.15,
-		shadowRadius: 10,
-		shadowOffset: { width: 0, height: 4 },
-		elevation: 4,
+		borderColor: colors.border.main,
+		...shadow.md,
 	},
 	title: {
 		fontSize: 18,
 		fontWeight: "600",
-		marginBottom: 14,
-		color: "#8b4513",
+		marginBottom: spacing.md,
+		color: colors.text.secondary,
 		textAlign: "center",
 	},
 	dayCard: {
-		backgroundColor: "#fff",
-		borderRadius: 20,
-		padding: 16,
-		marginRight: 14,
+		backgroundColor: colors.background.main,
+		borderRadius: borderRadius.lg,
+		padding: spacing.md,
+		marginRight: spacing.md,
 		minWidth: 110,
 		alignItems: "center",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 6,
-		shadowOffset: { width: 0, height: 3 },
-		elevation: 3,
 		borderWidth: 1,
-		borderColor: "#ede0d4",
+		borderColor: colors.border.main,
+		...shadow.sm,
 	},
 	date: {
 		fontSize: 14,
 		fontWeight: "600",
-		marginBottom: 8,
-		color: "#8b4513",
-		backgroundColor: "#fff9f0",
-		paddingVertical: 3,
-		paddingHorizontal: 10,
-		borderRadius: 12,
+		marginBottom: spacing.sm,
+		color: colors.text.secondary,
+		backgroundColor: colors.background.secondary,
+		paddingVertical: spacing.xs,
+		paddingHorizontal: spacing.sm,
+		borderRadius: borderRadius.md,
 	},
 	item: {
 		fontSize: 13,
-		color: "#a67c52",
-		marginBottom: 4,
+		color: colors.secondary,
+		marginBottom: spacing.xs,
 		lineHeight: 20,
 	},
 });

@@ -1,6 +1,7 @@
 // お知らせ・通知バナー
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { colors, spacing, shadow, borderRadius } from "../../constants/theme";
 
 type Notification = {
 	id: string;
@@ -31,52 +32,44 @@ const NotificationBanner: React.FC<NotificationBannerProps> = ({
 
 const styles = StyleSheet.create({
 	container: {
-		marginVertical: 16,
-		backgroundColor: "#fff9f0",
-		borderRadius: 24,
-		padding: 16,
+		marginVertical: spacing.md,
+		backgroundColor: colors.background.secondary,
+		borderRadius: borderRadius.lg,
+		padding: spacing.md,
 		borderWidth: 1,
-		borderColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.15,
-		shadowRadius: 10,
-		shadowOffset: { width: 0, height: 4 },
-		elevation: 4,
+		borderColor: colors.border.main,
+		...shadow.md,
 	},
 	title: {
 		fontSize: 18,
 		fontWeight: "600",
-		marginBottom: 14,
-		color: "#8b4513",
+		marginBottom: spacing.md,
+		color: colors.text.secondary,
 		textAlign: "center",
 	},
 	banner: {
-		backgroundColor: "#fff",
-		borderRadius: 20,
-		padding: 16,
-		marginBottom: 12,
+		backgroundColor: colors.background.main,
+		borderRadius: borderRadius.lg,
+		padding: spacing.md,
+		marginBottom: spacing.sm,
 		borderWidth: 1,
-		borderColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 6,
-		shadowOffset: { width: 0, height: 3 },
-		elevation: 3,
+		borderColor: colors.border.main,
+		...shadow.sm,
 	},
 	message: {
 		fontSize: 14,
-		color: "#6b3c11",
-		marginBottom: 6,
+		color: colors.text.primary,
+		marginBottom: spacing.xs,
 		lineHeight: 20,
 	},
 	date: {
 		fontSize: 12,
-		color: "#8b4513",
+		color: colors.text.secondary,
 		textAlign: "right",
-		backgroundColor: "#fff9f0",
-		paddingVertical: 3,
-		paddingHorizontal: 10,
-		borderRadius: 12,
+		backgroundColor: colors.background.secondary,
+		paddingVertical: spacing.xs,
+		paddingHorizontal: spacing.sm,
+		borderRadius: borderRadius.md,
 		alignSelf: "flex-end",
 	},
 });

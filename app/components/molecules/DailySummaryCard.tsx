@@ -1,6 +1,7 @@
 // 今日の記録概要カード
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { colors, spacing, shadow, borderRadius } from "../../constants/theme";
 
 type DailySummaryCardProps = {
 	weight?: number;
@@ -46,56 +47,48 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = ({
 
 const styles = StyleSheet.create({
 	card: {
-		backgroundColor: "#fff9f0", // クリーム色
-		borderRadius: 20,
-		padding: 20,
-		marginVertical: 12,
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.15,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 3 },
-		elevation: 3,
+		backgroundColor: colors.background.secondary,
+		borderRadius: borderRadius.lg,
+		padding: spacing.lg,
+		marginVertical: spacing.md,
 		borderWidth: 1,
-		borderColor: "#ede0d4",
+		borderColor: colors.border.main,
+		...shadow.md,
 	},
 	title: {
 		fontSize: 18,
 		fontWeight: "600",
-		marginBottom: 12,
-		color: "#8b4513",
+		marginBottom: spacing.md,
+		color: colors.text.secondary,
 		textAlign: "center",
 	},
 	row: {
 		flexDirection: "row",
 		justifyContent: "space-around",
 		flexWrap: "wrap",
-		padding: 4,
+		padding: spacing.xs,
 	},
 	item: {
 		alignItems: "center",
-		backgroundColor: "#fff",
-		padding: 12,
-		borderRadius: 16,
-		marginHorizontal: 4,
-		marginVertical: 4,
+		backgroundColor: colors.background.main,
+		padding: spacing.md,
+		borderRadius: borderRadius.lg,
+		marginHorizontal: spacing.xs,
+		marginVertical: spacing.xs,
 		minWidth: "45%",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		shadowOffset: { width: 0, height: 2 },
-		elevation: 2,
 		borderWidth: 1,
-		borderColor: "#ede0d4",
+		borderColor: colors.border.main,
+		...shadow.sm,
 	},
 	label: {
 		fontSize: 15,
-		color: "#a67c52",
-		marginBottom: 4,
+		color: colors.secondary,
+		marginBottom: spacing.xs,
 	},
 	value: {
 		fontSize: 18,
 		fontWeight: "600",
-		color: "#8b4513",
+		color: colors.text.secondary,
 	},
 });
 

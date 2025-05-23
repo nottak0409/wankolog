@@ -1,5 +1,6 @@
 import { StyleSheet, View, ScrollView } from "react-native";
 import { Text } from "react-native";
+import { colors, spacing } from "../constants/theme";
 import DailySummaryCard from "../components/molecules/DailySummaryCard";
 import WeeklySummaryCard from "../components/molecules/WeeklySummaryCard";
 import NotificationBanner from "../components/molecules/NotificationBanner";
@@ -88,10 +89,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#fff9f0",
+		backgroundColor: colors.background.secondary,
 	},
 	content: {
-		padding: 20,
-		paddingBottom: 40,
+		padding: spacing.lg,
+		paddingBottom: spacing.xxl,
 	},
 });
