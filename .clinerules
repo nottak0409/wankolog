@@ -186,12 +186,45 @@ interface MedicalRecord {
 - スナップショットテストの活用
 - E2Eテストの実装
 
-## 10. ドキュメント
+## 10. デザインシステム
+### デザイントークン（constants/theme.ts）
+- カラーパレット
+  - primary: "#6b3c11" (ブラウン)
+  - secondary: "#a67c52" (ライトブラウン)
+  - background.main: "#fff" (白)
+  - background.secondary: "#fff9f0" (クリームホワイト)
+  - border.main: "#ede0d4" (ベージュ)
+  - text.primary/secondary (ブラウン系統)
+
+- スペーシング
+  - xs: 4px
+  - sm: 8px
+  - md: 16px
+  - lg: 20px
+  - xl: 24px
+  - xxl: 32px
+
+- ボーダーラジウス
+  - sm: 4px
+  - md: 8px
+  - lg: 16px
+  - full: 9999px
+
+- シャドウ
+  - sm: 基本の影効果
+  - md: 強調された影効果
+
+### 使用方法
+- すべてのスタイリングでデザイントークンを使用
+- ハードコードされた値は使用しない
+- コンポーネント間で一貫したデザインを維持
+
+## 11. ドキュメント
 - コンポーネントにJSDocコメントを付与
 - README.mdの定期的な更新
 - 変更履歴の記録
 
-## 11. バージョン管理
+## 12. バージョン管理
 - Semantic Versioning の採用
 - feature/bugfix/hotfixブランチの使用
 - コミットメッセージは日本語で明確に
