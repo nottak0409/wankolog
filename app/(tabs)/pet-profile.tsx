@@ -14,7 +14,7 @@ export default function PetProfileScreen() {
 
 	return (
 		<ScrollView style={styles.container}>
-			<View style={styles.header}>
+			<View style={styles.content}>
 				<View style={styles.imageContainer}>
 					<Image
 						source={{ uri: petData.imageUrl }}
@@ -47,17 +47,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "#fff9f0",
 	},
-	header: {
+	content: {
 		alignItems: "center",
 		padding: 20,
-		backgroundColor: "#fff",
-		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		shadowOffset: { width: 0, height: 2 },
-		elevation: 2,
 	},
 	imageContainer: {
 		width: 160,

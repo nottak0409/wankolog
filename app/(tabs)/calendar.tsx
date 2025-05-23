@@ -4,7 +4,6 @@ import { StyleSheet, View, Text } from "react-native";
 export default function CalendarScreen() {
 	return (
 		<View style={styles.container}>
-			<Text style={styles.header}>カレンダー</Text>
 			<View style={styles.content}>
 				<Text style={styles.placeholder}>
 					カレンダー機能は開発中です
@@ -18,21 +17,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: "#fff9f0",
-	},
-	header: {
-		fontSize: 24,
-		fontWeight: "600",
-		color: "#6b3c11",
-		textAlign: "center",
-		backgroundColor: "#fff",
-		paddingVertical: 16,
-		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		shadowOffset: { width: 0, height: 2 },
-		elevation: 2,
 	},
 	content: {
 		flex: 1,

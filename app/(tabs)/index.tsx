@@ -74,7 +74,6 @@ export default function HomeScreen() {
 			style={styles.container}
 			contentContainerStyle={styles.content}
 		>
-			<Text style={styles.header}>わんこログ 🐶</Text>
 			<PetProfileCard
 				name="ポチ"
 				imageUrl="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
@@ -94,23 +93,5 @@ const styles = StyleSheet.create({
 	content: {
 		padding: 20,
 		paddingBottom: 40,
-	},
-	header: {
-		fontSize: 24,
-		fontWeight: "600",
-		marginBottom: 16,
-		color: "#6b3c11",
-		textAlign: "center",
-		backgroundColor: "#fff",
-		marginHorizontal: -20,
-		marginTop: -20,
-		paddingVertical: 16,
-		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		shadowOffset: { width: 0, height: 2 },
-		elevation: 2,
 	},
 });
