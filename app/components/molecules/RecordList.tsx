@@ -9,7 +9,7 @@ const getIconName = (type: Record["type"]) => {
 		case "meal":
 			return "restaurant";
 		case "poop":
-			return "fitness";
+			return "nutrition";
 		case "exercise":
 			return "walk";
 		default:
@@ -17,7 +17,12 @@ const getIconName = (type: Record["type"]) => {
 	}
 };
 
-export const RecordList = ({ records }: { records: Record[] }) => {
+type RecordListProps = {
+	records: Record[];
+	date?: string;
+};
+
+export const RecordList = ({ records, date }: RecordListProps) => {
 	const renderItem = ({ item }: { item: Record }) => (
 		<View style={styles.recordItem}>
 			<View style={styles.iconContainer}>
@@ -34,15 +39,33 @@ export const RecordList = ({ records }: { records: Record[] }) => {
 		</View>
 	);
 
+	const formatDate = (date?: string) => {
+		if (!date) return "今日の記録";
+		const d = new Date(date);
+		return `${d.getMonth() + 1}月${d.getDate()}日の記録`;
+	};
+
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>今日の記録</Text>
-			<FlatList
-				data={records}
-				renderItem={renderItem}
-				keyExtractor={(item) => item.id}
-				contentContainerStyle={styles.listContent}
-			/>
+			<Text style={styles.title}>{formatDate(date)}</Text>
+			{records.length > 0 ? (
+				<FlatList
+					data={records}
+					renderItem={renderItem}
+					keyExtractor={(item) => item.id}
+					contentContainerStyle={styles.listContent}
+					showsVerticalScrollIndicator={false}
+				/>
+			) : (
+				<View style={styles.emptyContainer}>
+					<Ionicons
+						name="document-text-outline"
+						size={32}
+						color={theme.colors.text.secondary}
+					/>
+					<Text style={styles.emptyText}>記録はありません</Text>
+				</View>
+			)}
 		</View>
 	);
 };
@@ -91,5 +114,15 @@ const styles = StyleSheet.create({
 	detail: {
 		fontSize: 14,
 		color: theme.colors.text.primary,
+	},
+	emptyContainer: {
+		alignItems: "center",
+		justifyContent: "center",
+		padding: theme.spacing.xl,
+	},
+	emptyText: {
+		fontSize: 14,
+		color: theme.colors.text.secondary,
+		marginTop: theme.spacing.sm,
 	},
 });
