@@ -1,0 +1,197 @@
+あなたはReactNativeのプロです。このプロジェクトは以下です。
+
+# 🏠 ホーム画面（Dashboard）
+[Header] わんこログ 🐶（日付 or ナビ）
+-----------------------------
+[今日の記録概要]
+📏 体重　🍽 食事　💩 うんち　🏃‍♂️ 運動
+→ カード状にサマリ表示
+
+[今週の記録]
+📅 1週間分のミニカレンダー or 横スクロールカード
+
+[お知らせ・通知]
+🔔 最新リマインドやメッセージ（バナー or リスト）
+
+# 🐶 愛犬プロフィール画面
+[Header] ◀ 愛犬プロフィール
+
+[プロフィールカード]
+🐶 写真＋名前・性別・誕生日・犬種
+
+[体重グラフ]
+📈 折れ線グラフで週ごとの変化（予定）
+
+# 📅 カレンダー画面
+[Header] ◀ カレンダー
+[月表示 or 週表示のカレンダー]
+→ タップでその日の詳細へ
+
+[記録一覧]
+📋 食事・うんち・運動 などのアイコン付きリスト
+
+# 📝 記録入力画面
+[Header] ◀ 記録入力
+[セクション]
+📷 食事（写真＋メモ）
+💩 排泄（回数・色・硬さ）
+😴 睡眠（時間）
+🚶 散歩（距離＋時間）
+📝 自由メモ（フリー入力）
+→ Saveボタンを画面下部に固定
+
+#  通院・ワクチン履歴
+[Header] ◀ 通院・ワクチン履歴
+
+[履歴カード]
+📅 日付 / 🏥 病名・メモ / 💊 薬
+
+[ワクチン管理]
+💉 種別・接種日・次回予定・通知ON/OFF
+
+# 🔔 通知設定
+[Header] ◀ 通知設定
+
+[トグルリスト]
+✅ ワクチン通知
+✅ 投薬通知
+✅ 健康チェック通知
+
+＋ 時刻設定・頻度設定あり
+
+# 開発ルール
+
+## 1. コンポーネント設計
+### 共通コンポーネント
+- atoms: 基本的なUI要素（ボタン、入力フィールド、アイコンなど）
+- molecules: 複数のatomsを組み合わせた要素（フォームグループ、カード、リストアイテムなど）
+
+### 画面固有コンポーネント
+- features/[画面名]/components: 各画面固有のコンポーネントを格納
+  例：
+  - features/home/components/DailySummaryCard
+  - features/calendar/components/WeeklyView
+  - features/profile/components/PetInfoForm
+
+### ディレクトリ構造
+```
+src/
+├── components/        # 共通コンポーネント
+│   ├── atoms/        # 基本UI要素
+│   └── molecules/    # 複合UI要素
+├── features/         # 画面ごとの機能
+│   ├── home/
+│   │   ├── components/
+│   │   └── screens/
+│   ├── calendar/
+│   │   ├── components/
+│   │   └── screens/
+│   └── profile/
+│       ├── components/
+│       └── screens/
+└── navigation/       # ナビゲーション関連
+```
+
+## 2. データ管理
+- Redux Toolkitを使用してグローバルステート管理
+- 以下のデータをストアで管理:
+  - ペット情報
+  - 健康記録データ
+  - 通知設定
+  - アプリ設定
+
+## 3. 型定義
+```typescript
+interface Pet {
+  id: string;
+  name: string;
+  breed: string;
+  birthday: Date;
+  gender: 'male' | 'female';
+  photo?: string;
+}
+
+interface HealthRecord {
+  id: string;
+  petId: string;
+  date: Date;
+  weight?: number;
+  meals: {
+    time: Date;
+    photo?: string;
+    memo?: string;
+  }[];
+  poops: {
+    time: Date;
+    condition: 'normal' | 'soft' | 'hard';
+    color: string;
+  }[];
+  exercise: {
+    duration: number; // minutes
+    distance?: number; // meters
+    memo?: string;
+  }[];
+  sleep?: {
+    duration: number; // hours
+  };
+}
+
+interface MedicalRecord {
+  id: string;
+  petId: string;
+  date: Date;
+  type: 'vaccine' | 'checkup' | 'treatment';
+  description: string;
+  nextAppointment?: Date;
+  medications?: {
+    name: string;
+    dosage: string;
+    frequency: string;
+  }[];
+}
+```
+
+## 4. 命名規則
+- コンポーネント: PascalCase (例: DogProfileCard)
+- 関数: camelCase (例: handleSubmit)
+- 定数: SNAKE_CASE (例: MAX_WEIGHT_LIMIT)
+- ファイル名: 
+  - コンポーネント: PascalCase.tsx
+  - ユーティリティ: camelCase.ts
+  - スタイル: PascalCase.styles.ts
+
+## 5. エラーハンドリング
+- try-catchブロックで非同期処理を適切に処理
+- エラーメッセージは日本語で表示
+- オフライン時のフォールバックUIを提供
+
+## 6. パフォーマンス
+- useMemoとuseCallbackを適切に使用
+- 画像の最適化（圧縮、キャッシュ）
+- 無限スクロールの実装（履歴表示時）
+
+## 7. アクセシビリティ
+- 適切なaria-labelの使用
+- タッチターゲットは最低44x44px
+- 十分なコントラスト比の確保
+
+## 8. セキュリティ
+- センシティブデータの暗号化
+- 入力値のバリデーション
+- デバッグログの本番環境での無効化
+
+## 9. テスト
+- Jestとreact-native-testing-libraryを使用
+- 重要なビジネスロジックのユニットテスト
+- スナップショットテストの活用
+- E2Eテストの実装
+
+## 10. ドキュメント
+- コンポーネントにJSDocコメントを付与
+- README.mdの定期的な更新
+- 変更履歴の記録
+
+## 11. バージョン管理
+- Semantic Versioning の採用
+- feature/bugfix/hotfixブランチの使用
+- コミットメッセージは日本語で明確に
