@@ -1,30 +1,27 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
+import { colors, shadow } from "../constants/theme";
 
 export default function TabLayout() {
 	return (
 		<Tabs
 			screenOptions={{
 				tabBarStyle: {
-					backgroundColor: "#fff",
-					borderTopColor: "#ede0d4",
+					backgroundColor: colors.background.main,
+					borderTopColor: colors.border.main,
 					paddingBottom: 0,
 				},
 				headerStyle: {
-					backgroundColor: "#fff",
-					elevation: 1,
-					shadowColor: "#8b4513",
-					shadowOpacity: 0.1,
-					shadowRadius: 4,
-					shadowOffset: { width: 0, height: 2 },
+					backgroundColor: colors.background.main,
+					...shadow.sm,
 				},
 				headerTitleStyle: {
-					color: "#6b3c11",
+					color: colors.text.primary,
 					fontWeight: "600",
 				},
-				tabBarActiveTintColor: "#6b3c11",
-				tabBarInactiveTintColor: "#a67c52",
+				tabBarActiveTintColor: colors.primary,
+				tabBarInactiveTintColor: colors.secondary,
 			}}
 		>
 			<Tabs.Screen
@@ -63,10 +60,10 @@ export default function TabLayout() {
 					title: "プロフィール",
 					headerTitle: "愛犬プロフィール",
 					headerTitleStyle: {
-						color: "#6b3c11",
+						color: colors.text.primary,
 					},
 					headerStyle: {
-						backgroundColor: "#fff",
+						backgroundColor: colors.background.main,
 					},
 					tabBarIcon: ({ color }) => (
 						<FontAwesome name="paw" size={24} color={color} />

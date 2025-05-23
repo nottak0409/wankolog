@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
+import { colors, shadow, spacing } from "../constants/theme";
 
 export default function PetProfileScreen() {
 	// 仮データ（後でReduxやAPI連携に差し替え）
@@ -45,24 +46,20 @@ export default function PetProfileScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#fff9f0",
+		backgroundColor: colors.background.secondary,
 	},
 	content: {
 		alignItems: "center",
-		padding: 20,
+		padding: spacing.lg,
 	},
 	imageContainer: {
 		width: 160,
 		height: 160,
 		borderRadius: 80,
 		overflow: "hidden",
-		marginBottom: 16,
-		backgroundColor: "#fff",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.15,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 3 },
-		elevation: 4,
+		marginBottom: spacing.md,
+		backgroundColor: colors.background.main,
+		...shadow.md,
 	},
 	image: {
 		width: "100%",
@@ -71,26 +68,26 @@ const styles = StyleSheet.create({
 	name: {
 		fontSize: 24,
 		fontWeight: "600",
-		color: "#6b3c11",
+		color: colors.text.primary,
 	},
 	infoContainer: {
-		padding: 20,
+		padding: spacing.lg,
 	},
 	infoRow: {
 		flexDirection: "row",
-		paddingVertical: 12,
+		paddingVertical: spacing.md,
 		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
+		borderBottomColor: colors.border.main,
 	},
 	label: {
 		width: 80,
 		fontSize: 16,
-		color: "#8b4513",
+		color: colors.text.secondary,
 	},
 	value: {
 		flex: 1,
 		fontSize: 16,
-		color: "#6b3c11",
-		marginLeft: 12,
+		color: colors.text.primary,
+		marginLeft: spacing.md,
 	},
 });
