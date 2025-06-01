@@ -7,13 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Stack, useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "../constants/theme";
 
 export default function PetProfileScreen() {
-  const router = useRouter();
-
   // 仮データ（後でReduxやAPI連携に差し替え）
   const petData = {
     name: "ポチ",
@@ -24,34 +20,8 @@ export default function PetProfileScreen() {
       "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
   };
 
-  const handleEditPress = () => {
-    router.push("/pet-profile-edit");
-  };
-
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: "愛犬プロフィール",
-          headerStyle: {
-            backgroundColor: theme.colors.background.main,
-          },
-          headerTintColor: theme.colors.text.primary,
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={handleEditPress}
-              style={styles.editButton}
-            >
-              <MaterialCommunityIcons
-                name="pencil"
-                size={24}
-                color={theme.colors.primary}
-              />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-
       <ScrollView>
         <View style={styles.header}>
           <View style={styles.imageContainer}>
@@ -91,7 +61,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     padding: theme.spacing.lg,
-    backgroundColor: theme.colors.background.main,
+    backgroundColor: theme.colors.background.secondary,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border.main,
     ...theme.shadows.sm,

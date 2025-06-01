@@ -1,93 +1,42 @@
 import React from "react";
-import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
-import { colors, shadows, spacing } from "../constants/theme";
+import { Stack } from "expo-router";
+import PetProfileScreen from "../screens/PetProfileScreen";
+import theme from "../constants/theme";
+import { TouchableOpacity } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
-export default function PetProfileScreen() {
-	// 仮データ（後でReduxやAPI連携に差し替え）
-	const petData = {
-		name: "ポチ",
-		breed: "柴犬",
-		birthday: "2022年5月1日",
-		gender: "オス",
-		imageUrl:
-			"https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
-	};
+export default function PetProfileLayout() {
+  const router = useRouter();
 
-	return (
-		<ScrollView style={styles.container}>
-			<View style={styles.content}>
-				<View style={styles.imageContainer}>
-					<Image
-						source={{ uri: petData.imageUrl }}
-						style={styles.image}
-						resizeMode="cover"
-					/>
-				</View>
-				<Text style={styles.name}>{petData.name}</Text>
-			</View>
-			<View style={styles.infoContainer}>
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>犬種</Text>
-					<Text style={styles.value}>{petData.breed}</Text>
-				</View>
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>誕生日</Text>
-					<Text style={styles.value}>{petData.birthday}</Text>
-				</View>
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>性別</Text>
-					<Text style={styles.value}>{petData.gender}</Text>
-				</View>
-			</View>
-		</ScrollView>
-	);
+  const handleEditPress = () => {
+    router.push("/pet-profile-edit");
+  };
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: "愛犬プロフィール",
+          headerStyle: {
+            backgroundColor: theme.colors.background.main,
+          },
+          headerTintColor: theme.colors.text.primary,
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={handleEditPress}
+              style={{ padding: theme.spacing.sm }}
+            >
+              <MaterialCommunityIcons
+                name="pencil"
+                size={24}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <PetProfileScreen />
+    </>
+  );
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: colors.background.secondary,
-	},
-	content: {
-		alignItems: "center",
-		padding: spacing.lg,
-	},
-	imageContainer: {
-		width: 160,
-		height: 160,
-		borderRadius: 80,
-		overflow: "hidden",
-		marginBottom: spacing.md,
-		backgroundColor: colors.background.main,
-		...shadows.md,
-	},
-	image: {
-		width: "100%",
-		height: "100%",
-	},
-	name: {
-		fontSize: 24,
-		fontWeight: "600",
-		color: colors.text.primary,
-	},
-	infoContainer: {
-		padding: spacing.lg,
-	},
-	infoRow: {
-		flexDirection: "row",
-		paddingVertical: spacing.md,
-		borderBottomWidth: 1,
-		borderBottomColor: colors.border.main,
-	},
-	label: {
-		width: 80,
-		fontSize: 16,
-		color: colors.text.secondary,
-	},
-	value: {
-		flex: 1,
-		fontSize: 16,
-		color: colors.text.primary,
-		marginLeft: spacing.md,
-	},
-});
