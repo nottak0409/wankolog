@@ -1,104 +1,140 @@
 import React from "react";
-import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import theme from "../constants/theme";
 
 export default function PetProfileScreen() {
-	// 仮データ（後でReduxやAPI連携に差し替え）
-	const petData = {
-		name: "ポチ",
-		breed: "柴犬",
-		birthday: "2022年5月1日",
-		gender: "オス",
-		imageUrl:
-			"https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
-	};
+  const router = useRouter();
 
-	return (
-		<ScrollView style={styles.container}>
-			<View style={styles.header}>
-				<View style={styles.imageContainer}>
-					<Image
-						source={{ uri: petData.imageUrl }}
-						style={styles.image}
-						resizeMode="cover"
-					/>
-				</View>
-				<Text style={styles.name}>{petData.name}</Text>
-			</View>
-			<View style={styles.infoContainer}>
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>犬種</Text>
-					<Text style={styles.value}>{petData.breed}</Text>
-				</View>
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>誕生日</Text>
-					<Text style={styles.value}>{petData.birthday}</Text>
-				</View>
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>性別</Text>
-					<Text style={styles.value}>{petData.gender}</Text>
-				</View>
-			</View>
-		</ScrollView>
-	);
+  // 仮データ（後でReduxやAPI連携に差し替え）
+  const petData = {
+    name: "ポチ",
+    breed: "柴犬",
+    birthday: "2022年5月1日",
+    gender: "オス",
+    imageUrl:
+      "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
+  };
+
+  const handleEditPress = () => {
+    router.push("/pet-profile-edit");
+  };
+
+  return (
+    <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: "愛犬プロフィール",
+          headerStyle: {
+            backgroundColor: theme.colors.background.main,
+          },
+          headerTintColor: theme.colors.text.primary,
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={handleEditPress}
+              style={styles.editButton}
+            >
+              <MaterialCommunityIcons
+                name="pencil"
+                size={24}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <ScrollView>
+        <View style={styles.header}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: petData.imageUrl }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </View>
+          <Text style={styles.name}>{petData.name}</Text>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>犬種</Text>
+            <Text style={styles.value}>{petData.breed}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>誕生日</Text>
+            <Text style={styles.value}>{petData.birthday}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>性別</Text>
+            <Text style={styles.value}>{petData.gender}</Text>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff9f0",
-	},
-	header: {
-		alignItems: "center",
-		padding: 20,
-		backgroundColor: "#fff",
-		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		shadowOffset: { width: 0, height: 2 },
-		elevation: 2,
-	},
-	imageContainer: {
-		width: 160,
-		height: 160,
-		borderRadius: 80,
-		overflow: "hidden",
-		marginBottom: 16,
-		backgroundColor: "#fff",
-		shadowColor: "#8b4513",
-		shadowOpacity: 0.15,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 3 },
-		elevation: 4,
-	},
-	image: {
-		width: "100%",
-		height: "100%",
-	},
-	name: {
-		fontSize: 24,
-		fontWeight: "600",
-		color: "#6b3c11",
-	},
-	infoContainer: {
-		padding: 20,
-	},
-	infoRow: {
-		flexDirection: "row",
-		paddingVertical: 12,
-		borderBottomWidth: 1,
-		borderBottomColor: "#ede0d4",
-	},
-	label: {
-		width: 80,
-		fontSize: 16,
-		color: "#8b4513",
-	},
-	value: {
-		flex: 1,
-		fontSize: 16,
-		color: "#6b3c11",
-		marginLeft: 12,
-	},
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background.secondary,
+  },
+  header: {
+    alignItems: "center",
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.background.main,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.main,
+    ...theme.shadows.sm,
+  },
+  imageContainer: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    overflow: "hidden",
+    marginBottom: theme.spacing.md,
+    backgroundColor: theme.colors.background.main,
+    ...theme.shadows.md,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: theme.colors.text.primary,
+  },
+  infoContainer: {
+    padding: theme.spacing.lg,
+  },
+  infoRow: {
+    flexDirection: "row",
+    paddingVertical: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.main,
+  },
+  label: {
+    width: 80,
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+  },
+  value: {
+    flex: 1,
+    fontSize: 16,
+    color: theme.colors.text.primary,
+    marginLeft: theme.spacing.sm,
+  },
+  editButton: {
+    padding: theme.spacing.sm,
+  },
 });
