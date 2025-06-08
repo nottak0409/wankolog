@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { PetProfile, PetProfileFormData } from "../types/profile";
 import { ProfileImagePicker } from "../components/molecules/ProfileImagePicker";
@@ -49,51 +49,58 @@ export default function PetProfileEditScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: "プロフィール編集",
-          headerStyle: {
-            backgroundColor: theme.colors.background.main,
-          },
-          headerTintColor: theme.colors.text.primary,
-        }}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-      >
-        <ProfileImagePicker
-          currentImage={profile.photo}
-          onImageSelected={handleImageSelected}
-        />
-
-        <PetProfileForm
-          initialData={{
-            name: profile.name,
-            gender: profile.gender,
-            birthday: profile.birthday,
-            breed: profile.breed,
-            weight: profile.weight?.toString(),
-            registrationNumber: profile.registrationNumber,
-            microchipNumber: profile.microchipNumber,
-            notes: profile.notes,
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "プロフィール編集",
+            headerStyle: {
+              backgroundColor: theme.colors.background.main,
+            },
+            headerTintColor: theme.colors.text.primary,
           }}
-          onSubmit={handleSubmit}
         />
-      </ScrollView>
-    </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+        >
+          <ProfileImagePicker
+            currentImage={profile.photo}
+            onImageSelected={handleImageSelected}
+          />
+
+          <PetProfileForm
+            initialData={{
+              name: profile.name,
+              gender: profile.gender,
+              birthday: profile.birthday,
+              breed: profile.breed,
+              weight: profile.weight?.toString(),
+              registrationNumber: profile.registrationNumber,
+              microchipNumber: profile.microchipNumber,
+              notes: profile.notes,
+            }}
+            onSubmit={handleSubmit}
+          />
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background.main,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
   scrollView: {
     flex: 1,
+    backgroundColor: theme.colors.background.secondary,
   },
   content: {
     paddingVertical: theme.spacing.lg,

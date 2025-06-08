@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Switch,
   TouchableOpacity,
+  SafeAreaView,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
@@ -77,92 +78,105 @@ export default function NotificationSettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>🔔 通知設定</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView}>
+          <Text style={styles.title}>🔔 通知設定</Text>
 
-      {settings.map((setting) => (
-        <View key={setting.id} style={styles.settingCard}>
-          <View style={styles.header}>
-            <View style={styles.titleContainer}>
-              <MaterialCommunityIcons
-                name={getNotificationTypeIcon(setting.type)}
-                size={24}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.settingTitle}>
-                {getNotificationTypeLabel(setting.type)}
-              </Text>
-            </View>
-            <Switch
-              value={setting.enabled}
-              onValueChange={(enabled) => handleToggle(setting.id, enabled)}
-              trackColor={{ false: "#767577", true: theme.colors.primary }}
-              thumbColor={theme.colors.background.main}
-            />
-          </View>
-
-          {setting.enabled && (
-            <View style={styles.settingDetails}>
-              <View style={styles.settingRow}>
-                <Text style={styles.label}>通知時刻</Text>
-                <TimePicker
-                  time={setting.time || "09:00"}
-                  onTimeChange={(time) => handleTimeChange(setting.id, time)}
+          {settings.map((setting) => (
+            <View key={setting.id} style={styles.settingCard}>
+              <View style={styles.header}>
+                <View style={styles.titleContainer}>
+                  <MaterialCommunityIcons
+                    name={getNotificationTypeIcon(setting.type)}
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.settingTitle}>
+                    {getNotificationTypeLabel(setting.type)}
+                  </Text>
+                </View>
+                <Switch
+                  value={setting.enabled}
+                  onValueChange={(enabled) => handleToggle(setting.id, enabled)}
+                  trackColor={{ false: "#767577", true: theme.colors.primary }}
+                  thumbColor={theme.colors.background.main}
                 />
               </View>
 
-              <View style={styles.settingRow}>
-                <Text style={styles.label}>通知頻度</Text>
-                <View style={styles.frequencyButtons}>
-                  {FREQUENCY_OPTIONS.map((option) => (
-                    <TouchableOpacity
-                      key={option.value}
-                      style={[
-                        styles.frequencyButton,
-                        setting.frequency === option.value &&
-                          styles.frequencyButtonActive,
-                      ]}
-                      onPress={() =>
-                        handleFrequencyChange(setting.id, option.value)
+              {setting.enabled && (
+                <View style={styles.settingDetails}>
+                  <View style={styles.settingRow}>
+                    <Text style={styles.label}>通知時刻</Text>
+                    <TimePicker
+                      time={setting.time || "09:00"}
+                      onTimeChange={(time) =>
+                        handleTimeChange(setting.id, time)
                       }
-                    >
-                      <Text
-                        style={[
-                          styles.frequencyButtonText,
-                          setting.frequency === option.value &&
-                            styles.frequencyButtonTextActive,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              {setting.frequency === "custom" && (
-                <View style={styles.customDaysContainer}>
-                  <Text style={styles.label}>カスタム日数</Text>
-                  <View style={styles.customDaysInput}>
-                    <Text style={styles.customDaysText}>
-                      {setting.customDays || 1}
-                    </Text>
-                    <Text style={styles.customDaysUnit}>日</Text>
+                    />
                   </View>
+
+                  <View style={styles.settingRow}>
+                    <Text style={styles.label}>通知頻度</Text>
+                    <View style={styles.frequencyButtons}>
+                      {FREQUENCY_OPTIONS.map((option) => (
+                        <TouchableOpacity
+                          key={option.value}
+                          style={[
+                            styles.frequencyButton,
+                            setting.frequency === option.value &&
+                              styles.frequencyButtonActive,
+                          ]}
+                          onPress={() =>
+                            handleFrequencyChange(setting.id, option.value)
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.frequencyButtonText,
+                              setting.frequency === option.value &&
+                                styles.frequencyButtonTextActive,
+                            ]}
+                          >
+                            {option.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  {setting.frequency === "custom" && (
+                    <View style={styles.customDaysContainer}>
+                      <Text style={styles.label}>カスタム日数</Text>
+                      <View style={styles.customDaysInput}>
+                        <Text style={styles.customDaysText}>
+                          {setting.customDays || 1}
+                        </Text>
+                        <Text style={styles.customDaysUnit}>日</Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
               )}
             </View>
-          )}
-        </View>
-      ))}
-    </ScrollView>
+          ))}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background.main,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
+  },
+  scrollView: {
+    flex: 1,
   },
   title: {
     fontSize: 20,
