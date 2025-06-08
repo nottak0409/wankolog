@@ -55,6 +55,7 @@ export default function RootLayout() {
           name="notification-settings"
           options={{ title: "通知設定" }}
         />
+        <Stack.Screen name="daily-record" options={{ title: "記録の追加" }} />
       </Stack>
     </SafeAreaProvider>
   );
