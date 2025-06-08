@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
 import theme from "../constants/theme";
 
 export default function PetProfileScreen() {
