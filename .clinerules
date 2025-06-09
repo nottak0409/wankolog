@@ -71,6 +71,85 @@
 [ワクチン管理]
 💉 種別・接種日・次回予定・通知ON/OFF
 
+# 🏥 通院・治療履歴画面
+
+## 1. 通院・治療記録の入力画面
+[Header] ◀ 通院・治療の記録
+
+[基本情報]
+- 通院日（必須）：DatePicker
+- 診察種別（必須）：セグメント（健康診断/治療）
+- 診察内容（必須）：複数行テキスト
+- 次回予約日：DatePicker
+
+[処方薬情報]（複数登録可能）
+- 薬の名前（必須）
+- 用量（必須）
+- 服用頻度（必須）
+- 服用期間
+→ 追加/削除可能なリスト形式
+
+[特記事項]
+📝 自由入力エリア
+
+## 2. ワクチン接種記録の入力画面
+[Header] ◀ ワクチン接種の記録
+
+[基本情報]
+- ワクチン種類（必須）：セレクト
+- 接種日（必須）：DatePicker
+- 次回接種予定日：DatePicker
+- 接種機関名：テキスト入力
+- 通知設定：ON/OFF + 通知タイミング
+
+[特記事項]
+📝 副反応などの記録用テキストエリア
+
+## 3. 共通UI要素
+- 保存ボタン：画面下部に固定
+- キャンセルボタン：ヘッダー左
+- 必須項目のバリデーション
+- 画像添付機能（任意）
+
+## 4. データ構造
+```typescript
+// 通院記録
+interface MedicalRecord {
+  id: string;
+  petId: string;
+  date: Date;
+  type: "checkup" | "treatment";
+  description: string;
+  nextAppointment?: Date;
+  medications?: Medication[];
+  notes?: string;
+  photos?: string[];
+}
+
+// 投薬情報
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  period?: string;
+}
+
+// ワクチン記録
+interface VaccineRecord {
+  id: string;
+  petId: string;
+  type: string;
+  lastDate: Date;
+  nextDate: Date;
+  hospital?: string;
+  notificationEnabled: boolean;
+  notificationTiming?: number;
+  notes?: string;
+  photos?: string[];
+}
+```
+
 # 🔔 通知設定
 [Header] ◀ 通知設定
 
