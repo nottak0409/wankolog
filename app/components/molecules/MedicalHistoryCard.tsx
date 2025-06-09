@@ -5,12 +5,16 @@ import { MedicalRecord } from "../../types/medical";
 import theme from "../../constants/theme";
 
 interface MedicalHistoryCardProps {
-  record: MedicalRecord;
+  record?: MedicalRecord;
+  records?: MedicalRecord[];
 }
 
 export const MedicalHistoryCard: React.FC<MedicalHistoryCardProps> = ({
   record,
+  records = [],
 }) => {
+  const recordsToDisplay = record ? [record] : records;
+
   const getIcon = (type: string) => {
     switch (type) {
       case "vaccine":
@@ -33,58 +37,71 @@ export const MedicalHistoryCard: React.FC<MedicalHistoryCardProps> = ({
   };
 
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.iconContainer}>
-          <MaterialCommunityIcons
-            name={getIcon(record.type)}
-            size={24}
-            color={theme.colors.primary}
-          />
-        </View>
-        <View style={styles.dateContainer}>
-          <Text style={styles.date}>{formatDate(record.date)}</Text>
-          <Text style={styles.type}>
-            {record.type === "vaccine"
-              ? "ワクチン接種"
-              : record.type === "checkup"
-              ? "健康診断"
-              : "治療"}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.content}>
-        <Text style={styles.description}>{record.description}</Text>
-        {record.medications && record.medications.length > 0 && (
-          <View style={styles.medicationContainer}>
-            <Text style={styles.medicationTitle}>💊 処方薬</Text>
-            {record.medications.map((med) => (
-              <Text key={med.id} style={styles.medication}>
-                {med.name} ({med.dosage}) - {med.frequency}
+    <View style={styles.container}>
+      <Text style={styles.title}>通院・治療履歴</Text>
+      {recordsToDisplay.map((record) => (
+        <View key={record.id} style={styles.card}>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <MaterialCommunityIcons
+                name={getIcon(record.type)}
+                size={24}
+                color={theme.colors.primary}
+              />
+            </View>
+            <View style={styles.dateContainer}>
+              <Text style={styles.date}>{formatDate(record.date)}</Text>
+              <Text style={styles.type}>
+                {record.type === "vaccine"
+                  ? "ワクチン接種"
+                  : record.type === "checkup"
+                  ? "健康診断"
+                  : "治療"}
               </Text>
-            ))}
+            </View>
           </View>
-        )}
-        {record.nextAppointment && (
-          <View style={styles.nextAppointment}>
-            <Text style={styles.nextAppointmentText}>
-              ⏰ 次回予約: {formatDate(record.nextAppointment)}
-            </Text>
+
+          <View style={styles.content}>
+            <Text style={styles.description}>{record.description}</Text>
+            {record.medications && record.medications.length > 0 && (
+              <View style={styles.medicationContainer}>
+                <Text style={styles.medicationTitle}>💊 処方薬</Text>
+                {record.medications.map((med) => (
+                  <Text key={med.id} style={styles.medication}>
+                    {med.name} ({med.dosage}) - {med.frequency}
+                  </Text>
+                ))}
+              </View>
+            )}
+            {record.nextAppointment && (
+              <View style={styles.nextAppointment}>
+                <Text style={styles.nextAppointmentText}>
+                  ⏰ 次回予約: {formatDate(record.nextAppointment)}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
-      </View>
+        </View>
+      ))}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    margin: theme.spacing.md,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.md,
+  },
   card: {
     backgroundColor: theme.colors.background.main,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    marginVertical: theme.spacing.sm,
-    marginHorizontal: theme.spacing.md,
+    marginBottom: theme.spacing.md,
     ...theme.shadows.sm,
   },
   header: {

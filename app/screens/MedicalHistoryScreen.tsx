@@ -1,107 +1,103 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import React from "react";
+import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MedicalHistoryCard } from "../components/molecules/MedicalHistoryCard";
 import { VaccineManagement } from "../components/molecules/VaccineManagement";
-import { MedicalRecord, VaccineRecord } from "../types/medical";
 import theme from "../constants/theme";
-
-const mockMedicalRecords: MedicalRecord[] = [
-  {
-    id: "1",
-    petId: "1",
-    date: new Date("2025-05-15"),
-    type: "checkup",
-    description: "年次健康診断。体重が若干増加傾向。食事量の調整を推奨。",
-    medications: [
-      {
-        id: "m1",
-        name: "整腸薬",
-        dosage: "1錠",
-        frequency: "1日2回 食後",
-      },
-    ],
-    nextAppointment: new Date("2025-11-15"),
-  },
-  {
-    id: "2",
-    petId: "1",
-    date: new Date("2025-04-20"),
-    type: "treatment",
-    description: "軽度の皮膚炎の治療。患部の洗浄と軟膏の処方。",
-    medications: [
-      {
-        id: "m2",
-        name: "皮膚炎軟膏",
-        dosage: "適量",
-        frequency: "1日2回 患部に塗布",
-      },
-    ],
-  },
-  {
-    id: "3",
-    petId: "1",
-    date: new Date("2025-03-01"),
-    type: "vaccine",
-    description: "狂犬病予防接種 定期接種",
-    nextAppointment: new Date("2026-03-01"),
-  },
-];
-
-const mockVaccineRecords: VaccineRecord[] = [
-  {
-    id: "v1",
-    petId: "1",
-    type: "狂犬病予防",
-    lastDate: new Date("2025-03-01"),
-    nextDate: new Date("2026-03-01"),
-    notificationEnabled: true,
-  },
-  {
-    id: "v2",
-    petId: "1",
-    type: "混合ワクチン",
-    lastDate: new Date("2024-12-15"),
-    nextDate: new Date("2025-12-15"),
-    notificationEnabled: false,
-  },
-  {
-    id: "v3",
-    petId: "1",
-    type: "ボルデテラ",
-    lastDate: new Date("2025-01-10"),
-    nextDate: new Date("2026-01-10"),
-    notificationEnabled: true,
-  },
-];
+import type { VaccineRecord, MedicalRecord } from "../types/medical";
 
 export default function MedicalHistoryScreen() {
-  const [vaccineRecords, setVaccineRecords] =
-    useState<VaccineRecord[]>(mockVaccineRecords);
+  const router = useRouter();
+  const { vaccineId } = useLocalSearchParams<{ vaccineId: string }>();
 
-  const handleNotificationToggle = (id: string, enabled: boolean) => {
-    setVaccineRecords((prev) =>
-      prev.map((record) =>
-        record.id === id ? { ...record, notificationEnabled: enabled } : record
-      )
-    );
+  // モックデータ
+  const mockMedicalRecords: MedicalRecord[] = [
+    {
+      id: "1",
+      petId: "pet-1",
+      type: "checkup",
+      date: new Date("2025-05-01"),
+      description: "定期健康診断",
+      nextAppointment: new Date("2025-11-01"),
+    },
+    {
+      id: "2",
+      petId: "pet-1",
+      type: "treatment",
+      date: new Date("2025-04-15"),
+      description: "皮膚の治療",
+      medications: [
+        {
+          id: "med-1",
+          name: "皮膚軟膏",
+          dosage: "1日2回",
+          frequency: "2週間",
+        },
+      ],
+      nextAppointment: new Date("2025-04-29"),
+    },
+  ];
+
+  const mockVaccines: VaccineRecord[] = [
+    {
+      id: "1",
+      petId: "pet-1",
+      type: "混合ワクチン",
+      lastDate: new Date("2025-05-01"),
+      nextDate: new Date("2025-11-01"),
+      notificationEnabled: true,
+    },
+    {
+      id: "2",
+      petId: "pet-1",
+      type: "狂犬病",
+      lastDate: new Date("2025-04-01"),
+      nextDate: new Date("2026-04-01"),
+      notificationEnabled: true,
+    },
+  ];
+
+  // 通知からの遷移の場合は該当のワクチン情報までスクロール
+  React.useEffect(() => {
+    if (vaccineId) {
+      // TODO: 該当のワクチン情報までスクロール
+      console.log("Scroll to vaccine:", vaccineId);
+    }
+  }, [vaccineId]);
+
+  const handleAdd = () => {
+    router.push("/medical-record-edit");
+  };
+
+  const handleNotificationToggle = (vaccineId: string) => {
+    console.log("Toggle notification for vaccine:", vaccineId);
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🏥 通院・治療履歴</Text>
-        {mockMedicalRecords.map((record) => (
-          <MedicalHistoryCard key={record.id} record={record} />
-        ))}
-      </View>
-
-      <View style={styles.section}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <MedicalHistoryCard records={mockMedicalRecords} />
         <VaccineManagement
-          vaccines={vaccineRecords}
+          vaccines={mockVaccines}
           onNotificationToggle={handleNotificationToggle}
         />
-      </View>
-    </ScrollView>
+        {/* スクロール領域の下部にパディングを追加 */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={handleAdd}
+        activeOpacity={0.8}
+      >
+        <MaterialCommunityIcons
+          name="plus"
+          size={24}
+          color={theme.colors.background.main}
+        />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -110,13 +106,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  section: {
-    marginBottom: theme.spacing.xl,
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: theme.spacing.xxl,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: theme.colors.text.primary,
-    padding: theme.spacing.md,
+  bottomPadding: {
+    height: 80,
+  },
+  fab: {
+    position: "absolute",
+    right: theme.spacing.md,
+    bottom: theme.spacing.md + 64,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });
