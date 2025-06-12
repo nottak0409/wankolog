@@ -6,12 +6,12 @@ import { useCallback } from "react";
 import { colors, spacing } from "../constants/theme";
 import DailySummaryCard from "../components/molecules/DailySummaryCard";
 import WeeklySummaryCard from "../components/molecules/WeeklySummaryCard";
-import NotificationBanner from "../components/molecules/NotificationBanner";
 import PetProfileCard from "../components/molecules/PetProfileCard";
-import type { Notification } from "../types/notification";
+import { NotificationCard } from "../components/molecules/NotificationCard";
 import type { PetProfile } from "../types/profile";
 import { petService, recordService } from "../database/services";
 import { DailySummary } from "../types/record";
+import { notificationItemService, NotificationItem } from "../services/notificationItemService";
 
 export default function HomeScreen() {
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
@@ -21,15 +21,17 @@ export default function HomeScreen() {
     poopsCount: 0,
     exerciseMinutes: 0,
   });
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
       loadPets();
-    }, [loadPets])
+      loadNotifications();
+    }, [])
   );
 
-  const loadPets = useCallback(async () => {
+  const loadPets = async () => {
     try {
       const allPets = await petService.getAll();
       if (allPets.length > 0) {
@@ -39,7 +41,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('Failed to load pets:', error);
     }
-  }, []);
+  };
 
   const loadTodayRecords = async (petId: string) => {
     try {
@@ -51,6 +53,31 @@ export default function HomeScreen() {
     }
   };
 
+  const loadNotifications = async () => {
+    try {
+      const generatedNotifications = await notificationItemService.generateNotifications();
+      console.log('生成された通知:', generatedNotifications);
+      
+      // 却下された通知を除外
+      const filteredNotifications = [];
+      for (const notification of generatedNotifications) {
+        const isDismissed = await notificationItemService.isDismissed(notification.id);
+        if (!isDismissed) {
+          filteredNotifications.push(notification);
+        }
+      }
+      console.log('フィルタ後の通知:', filteredNotifications);
+      setNotifications(filteredNotifications);
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  };
+
+  const handleDismissNotification = async (notificationId: string) => {
+    await notificationItemService.dismissNotification(notificationId);
+    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+  };
+
   // 過去一週間のサマリー（実装可能だが今回は仮データを使用）
   const weekSummary = [
     {
@@ -59,27 +86,6 @@ export default function HomeScreen() {
       mealsCount: todaySummary.mealsCount,
       poopsCount: todaySummary.poopsCount,
       exerciseMinutes: todaySummary.exerciseMinutes,
-    },
-  ];
-
-  const notifications: Notification[] = [
-    {
-      id: "1",
-      message: "ワクチン接種の予定日が近づいています",
-      date: "5/24 09:00",
-      type: "medical_history",
-      data: {
-        vaccineId: "vaccine-1",
-      },
-    },
-    {
-      id: "2",
-      message: "ごはんの記録を忘れずに！",
-      date: "5/23 18:00",
-      type: "daily_record",
-      data: {
-        recordDate: new Date().toISOString().split("T")[0],
-      },
     },
   ];
 
@@ -99,6 +105,12 @@ export default function HomeScreen() {
           <Text style={styles.noPetSubText}>タップして新規登録</Text>
         </TouchableOpacity>
       )}
+
+      <NotificationCard
+        notifications={notifications}
+        onDismiss={handleDismissNotification}
+      />
+
       <DailySummaryCard {...todaySummary} />
       <WeeklySummaryCard data={weekSummary} />
       
@@ -109,8 +121,6 @@ export default function HomeScreen() {
       >
         <Text style={styles.addRecordButtonText}>記録を追加</Text>
       </TouchableOpacity>
-      
-      <NotificationBanner notifications={notifications} />
     </ScrollView>
   );
 }
