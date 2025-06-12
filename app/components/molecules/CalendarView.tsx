@@ -52,17 +52,21 @@ LocaleConfig.defaultLocale = "ja";
 type CalendarViewProps = {
   onDayPress: (day: CalendarDay) => void;
   markedDates?: MarkedDates;
+  selectedDate?: string;
 };
 
 export const CalendarView = ({
   onDayPress,
   markedDates,
+  selectedDate,
 }: CalendarViewProps) => {
   return (
     <View style={styles.container}>
       <Calendar
         onDayPress={onDayPress}
         markedDates={markedDates}
+        selected={selectedDate}
+        current={selectedDate || new Date().toISOString().split('T')[0]}
         firstDay={0} // 週の開始日を日曜日に設定
         theme={{
           backgroundColor: theme.colors.background.main,

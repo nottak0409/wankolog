@@ -1,6 +1,7 @@
 import { petService, medicalService, recordService } from '../database/services';
 import { isVaccineNotificationEnabled } from '../(tabs)/settings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getJapanToday } from '../utils/dateUtils';
 
 export interface NotificationItem {
   id: string;
@@ -103,7 +104,7 @@ export const notificationItemService = {
       if (pets.length === 0) return null;
       
       const pet = pets[0];
-      const today = new Date().toISOString().split('T')[0];
+      const today = getJapanToday(); // 日本時間の今日
       const todayRecords = await recordService.getByDate(pet.id, today);
       
       // 当日の記録が何もない場合

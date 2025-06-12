@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import theme from "../../constants/theme";
+import { getJapanToday } from "../../utils/dateUtils";
 
 type DailySummaryCardProps = {
   weight?: number;
@@ -17,7 +18,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = ({
   mealsCount,
   poopsCount,
   exerciseMinutes,
-  date = new Date().toISOString().split("T")[0],
+  date = getJapanToday(),
 }) => {
   const router = useRouter();
 

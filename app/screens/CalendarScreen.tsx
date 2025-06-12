@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator, AppState } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CalendarView } from "../components/molecules/CalendarView";
@@ -9,20 +9,71 @@ import { CalendarDay, MarkedDates } from "../types/calendar";
 import { petService, recordService } from "../database/services";
 import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
+import { getJapanToday } from "../utils/dateUtils";
 
 export const CalendarScreen = () => {
   const router = useRouter();
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    // 初期値を日本時間の今日の日付に設定
+    return getJapanToday();
+  });
   const [records, setRecords] = useState<Record[]>([]);
   const [recordsByDate, setRecordsByDate] = useState<RecordsByDate>({});
+  const lastUpdateDate = useRef<string>('');
 
   useFocusEffect(
     React.useCallback(() => {
       loadData();
     }, [])
   );
+
+  // 日付変更を監視するためのタイマー（日本時間ベース）
+  useEffect(() => {
+    const checkDateChange = () => {
+      const today = getJapanToday(); // 日本時間の今日
+      if (lastUpdateDate.current && lastUpdateDate.current !== today) {
+        console.log('カレンダー画面: 日付が変わりました (JST):', lastUpdateDate.current, '->', today);
+        // 日付が変わったらデータを再読み込み
+        loadData();
+        // 選択日付も今日に更新（ユーザーが他の日付を選択していない場合のみ）
+        if (selectedDate === lastUpdateDate.current) {
+          setSelectedDate(today);
+        }
+      }
+      lastUpdateDate.current = today;
+    };
+
+    // 初回チェック
+    checkDateChange();
+    
+    // 1分ごとに日付変更をチェック
+    const interval = setInterval(checkDateChange, 60000);
+    
+    return () => clearInterval(interval);
+  }, [selectedDate]);
+
+  // アプリがアクティブになった時に日付をチェック（日本時間ベース）
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active') {
+        console.log('カレンダー画面: アプリがアクティブになりました');
+        const today = getJapanToday(); // 日本時間の今日
+        if (lastUpdateDate.current !== today) {
+          console.log('カレンダー画面: 日付が変わったため再読み込み (JST):', lastUpdateDate.current, '->', today);
+          loadData();
+          // 選択日付も今日に更新（ユーザーが他の日付を選択していない場合のみ）
+          if (selectedDate === lastUpdateDate.current) {
+            setSelectedDate(today);
+          }
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription?.remove();
+  }, [selectedDate]);
 
   const loadData = async () => {
     try {
@@ -32,11 +83,12 @@ export const CalendarScreen = () => {
         const pet = pets[0];
         setCurrentPet(pet);
         
-        // 過去60日の記録を取得
-        const endDate = new Date().toISOString().split('T')[0];
+        // 過去60日の記録を取得（日本時間ベース）
+        const endDate = getJapanToday(); // 日本時間の今日
         const startDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
           .toISOString().split('T')[0];
         
+        console.log('カレンダー画面: データを読み込み中 (JST):', endDate);
         const recordsByDateData = await recordService.getByDateRange(
           pet.id,
           startDate,
@@ -44,6 +96,10 @@ export const CalendarScreen = () => {
         );
         
         setRecordsByDate(recordsByDateData);
+        lastUpdateDate.current = endDate;
+        
+        // 今日の記録を自動選択
+        setRecords(recordsByDateData[selectedDate] || []);
       }
     } catch (error) {
       console.error("データの読み込みエラー:", error);
@@ -107,6 +163,7 @@ export const CalendarScreen = () => {
         <CalendarView
           onDayPress={handleDayPress}
           markedDates={getMarkedDates()}
+          selectedDate={selectedDate}
         />
         <View style={styles.recordSection}>
           <RecordList 

@@ -1,6 +1,5 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { Text } from "react-native";
-import { useState } from "react";
+import { StyleSheet, ScrollView, TouchableOpacity, AppState, Text } from "react-native";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import { colors, spacing } from "../constants/theme";
@@ -12,6 +11,7 @@ import type { PetProfile } from "../types/profile";
 import { petService, recordService } from "../database/services";
 import { DailySummary } from "../types/record";
 import { notificationItemService, NotificationItem } from "../services/notificationItemService";
+import { getJapanToday } from "../utils/dateUtils";
 
 export default function HomeScreen() {
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
@@ -22,6 +22,7 @@ export default function HomeScreen() {
     exerciseMinutes: 0,
   });
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const lastLoadedDate = useRef<string>('');
   const router = useRouter();
 
   useFocusEffect(
@@ -30,6 +31,48 @@ export default function HomeScreen() {
       loadNotifications();
     }, [])
   );
+
+  // 日付変更を監視するためのタイマー（日本時間ベース）
+  useEffect(() => {
+    const checkDateChange = () => {
+      const today = getJapanToday(); // 日本時間の今日
+      if (lastLoadedDate.current && lastLoadedDate.current !== today) {
+        console.log('日付が変わりました (JST):', lastLoadedDate.current, '->', today);
+        // 日付が変わったら今日のデータを再読み込み
+        if (currentPet) {
+          loadTodayRecords(currentPet.id);
+        }
+        loadNotifications(); // 通知も再生成
+      }
+      lastLoadedDate.current = today;
+    };
+
+    // 初回チェック
+    checkDateChange();
+    
+    // 1分ごとに日付変更をチェック
+    const interval = setInterval(checkDateChange, 60000);
+    
+    return () => clearInterval(interval);
+  }, [currentPet]);
+
+  // アプリがアクティブになった時に日付をチェック（日本時間ベース）
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active') {
+        console.log('アプリがアクティブになりました');
+        const today = getJapanToday(); // 日本時間の今日
+        if (lastLoadedDate.current !== today && currentPet) {
+          console.log('日付が変わったため再読み込み (JST):', lastLoadedDate.current, '->', today);
+          loadTodayRecords(currentPet.id);
+          loadNotifications();
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription?.remove();
+  }, [currentPet]);
 
   const loadPets = async () => {
     try {
@@ -45,9 +88,12 @@ export default function HomeScreen() {
 
   const loadTodayRecords = async (petId: string) => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getJapanToday(); // 日本時間の今日を使用
+      console.log('今日のデータを読み込み中 (JST):', today);
+      
       const summary = await recordService.getDailySummary(petId, today);
       setTodaySummary(summary);
+      lastLoadedDate.current = today;
     } catch (error) {
       console.error('Failed to load today records:', error);
     }
