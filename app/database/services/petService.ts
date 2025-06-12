@@ -1,9 +1,9 @@
-import { getDatabase } from '../init';
+import { ensureDatabase } from '../init';
 import { PetProfile } from '../../types/profile';
 
 export const petService = {
   async create(pet: Omit<PetProfile, 'id'>): Promise<string> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     
     await db.runAsync(
@@ -27,7 +27,7 @@ export const petService = {
   },
 
   async getById(id: string): Promise<PetProfile | null> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const result = await db.getFirstAsync(
       `SELECT * FROM pets WHERE id = ?`,
       [id]
@@ -39,14 +39,14 @@ export const petService = {
   },
 
   async getAll(): Promise<PetProfile[]> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const results = await db.getAllAsync(`SELECT * FROM pets ORDER BY created_at DESC`);
     
     return results.map(row => this.mapRowToPet(row as any));
   },
 
   async update(id: string, updates: Partial<Omit<PetProfile, 'id'>>): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const fields: string[] = [];
     const values: any[] = [];
     
@@ -97,7 +97,7 @@ export const petService = {
   },
 
   async delete(id: string): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     await db.runAsync(`DELETE FROM pets WHERE id = ?`, [id]);
   },
 

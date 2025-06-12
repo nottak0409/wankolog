@@ -1,6 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 const DATABASE_NAME = 'wankolog.db';
+const CURRENT_SCHEMA_VERSION = 2; // バージョンを上げました
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -8,6 +9,7 @@ export const initDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   if (!db) {
     db = await SQLite.openDatabaseAsync(DATABASE_NAME);
     await createTables();
+    await migrateDatabase();
   }
   return db;
 };
@@ -17,6 +19,99 @@ export const getDatabase = (): SQLite.SQLiteDatabase => {
     throw new Error('Database not initialized. Call initDatabase() first.');
   }
   return db;
+};
+
+export const ensureDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
+  if (!db) {
+    console.log('Database not initialized, initializing now...');
+    return await initDatabase();
+  }
+  return db;
+};
+
+const migrateDatabase = async (): Promise<void> => {
+  if (!db) return;
+
+  try {
+    // まずバージョン管理テーブルを作成
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS schema_version (
+        version INTEGER PRIMARY KEY
+      );
+    `);
+
+    // 現在のバージョンを取得
+    const result = await db.getFirstAsync<{ version: number }>(`
+      SELECT version FROM schema_version LIMIT 1
+    `);
+
+    const currentVersion = result?.version || 0;
+
+    if (currentVersion < CURRENT_SCHEMA_VERSION) {
+      console.log(`Migrating database from version ${currentVersion} to ${CURRENT_SCHEMA_VERSION}`);
+      
+      // バージョン1→2: daily_recordsテーブルにamountとunitカラムを追加
+      if (currentVersion < 2) {
+        try {
+          // カラムが存在するかチェック
+          const tableInfo = await db.getAllAsync(`PRAGMA table_info(daily_records)`);
+          const hasAmountColumn = tableInfo.some((col: any) => col.name === 'amount');
+          const hasUnitColumn = tableInfo.some((col: any) => col.name === 'unit');
+          
+          if (!hasAmountColumn) {
+            await db.execAsync(`ALTER TABLE daily_records ADD COLUMN amount REAL;`);
+            console.log('Added amount column to daily_records');
+          }
+          
+          if (!hasUnitColumn) {
+            await db.execAsync(`ALTER TABLE daily_records ADD COLUMN unit TEXT;`);
+            console.log('Added unit column to daily_records');
+          }
+          
+          // typeカラムのCHECK制約を更新（weightを追加）
+          // SQLiteでは制約を直接変更できないため、新しいテーブルを作成して移行
+          await db.execAsync(`
+            CREATE TABLE daily_records_new (
+              id TEXT PRIMARY KEY,
+              pet_id TEXT NOT NULL REFERENCES pets(id),
+              type TEXT NOT NULL CHECK (type IN ('meal', 'poop', 'exercise', 'weight')),
+              date TEXT NOT NULL,
+              time TEXT NOT NULL,
+              detail TEXT,
+              amount REAL,
+              unit TEXT,
+              created_at TEXT NOT NULL DEFAULT (datetime('now')),
+              updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+          `);
+          
+          // データを移行
+          await db.execAsync(`
+            INSERT INTO daily_records_new 
+            SELECT id, pet_id, type, date, time, detail, amount, unit, created_at, updated_at 
+            FROM daily_records;
+          `);
+          
+          // 古いテーブルを削除して新しいテーブルをリネーム
+          await db.execAsync(`DROP TABLE daily_records;`);
+          await db.execAsync(`ALTER TABLE daily_records_new RENAME TO daily_records;`);
+          
+          console.log('Migrated daily_records table structure');
+        } catch (error) {
+          console.log('Migration already completed or table structure is up to date');
+        }
+      }
+
+      // バージョンを更新
+      await db.execAsync(`
+        INSERT OR REPLACE INTO schema_version (version) VALUES (${CURRENT_SCHEMA_VERSION});
+      `);
+      
+      console.log(`Database migration completed to version ${CURRENT_SCHEMA_VERSION}`);
+    }
+  } catch (error) {
+    console.error('Database migration error:', error);
+  }
 };
 
 const createTables = async (): Promise<void> => {
@@ -45,10 +140,12 @@ const createTables = async (): Promise<void> => {
     CREATE TABLE IF NOT EXISTS daily_records (
       id TEXT PRIMARY KEY,
       pet_id TEXT NOT NULL REFERENCES pets(id),
-      type TEXT NOT NULL CHECK (type IN ('meal', 'poop', 'exercise')),
+      type TEXT NOT NULL CHECK (type IN ('meal', 'poop', 'exercise', 'weight')),
       date TEXT NOT NULL,
       time TEXT NOT NULL,
       detail TEXT,
+      amount REAL,
+      unit TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );

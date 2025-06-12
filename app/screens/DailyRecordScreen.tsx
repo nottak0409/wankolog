@@ -17,9 +17,11 @@ import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
 
 type RecordFormData = {
-  type: "meal" | "poop" | "exercise";
+  type: "meal" | "poop" | "exercise" | "weight";
   time: string;
   detail: string;
+  amount?: number;
+  unit?: string;
 };
 
 export default function DailyRecordScreen() {
@@ -32,6 +34,8 @@ export default function DailyRecordScreen() {
     type: "meal",
     time: new Date().toTimeString().slice(0, 5), // HH:mm形式
     detail: "",
+    amount: undefined,
+    unit: undefined,
   });
 
   useEffect(() => {
@@ -73,6 +77,8 @@ export default function DailyRecordScreen() {
         date: currentDate,
         time: recordData.time,
         detail: recordData.detail,
+        amount: recordData.amount,
+        unit: recordData.unit,
       });
 
       Alert.alert("成功", "記録を保存しました", [
@@ -86,7 +92,7 @@ export default function DailyRecordScreen() {
     }
   };
 
-  const getRecordIcon = (type: "meal" | "poop" | "exercise") => {
+  const getRecordIcon = (type: "meal" | "poop" | "exercise" | "weight") => {
     switch (type) {
       case "meal":
         return "food";
@@ -94,12 +100,14 @@ export default function DailyRecordScreen() {
         return "toilet";
       case "exercise":
         return "run";
+      case "weight":
+        return "scale";
       default:
         return "note";
     }
   };
 
-  const getRecordLabel = (type: "meal" | "poop" | "exercise") => {
+  const getRecordLabel = (type: "meal" | "poop" | "exercise" | "weight") => {
     switch (type) {
       case "meal":
         return "食事";
@@ -107,8 +115,23 @@ export default function DailyRecordScreen() {
         return "うんち";
       case "exercise":
         return "運動";
+      case "weight":
+        return "体重";
       default:
         return "その他";
+    }
+  };
+
+  const getDefaultUnit = (type: "meal" | "poop" | "exercise" | "weight") => {
+    switch (type) {
+      case "meal":
+        return "g";
+      case "exercise":
+        return "minutes";
+      case "weight":
+        return "kg";
+      default:
+        return "";
     }
   };
 
@@ -142,18 +165,22 @@ export default function DailyRecordScreen() {
       <View style={styles.typeSection}>
         <Text style={styles.sectionTitle}>記録タイプ</Text>
         <View style={styles.typeButtons}>
-          {(["meal", "poop", "exercise"] as const).map((type) => (
+          {(["meal", "poop", "exercise", "weight"] as const).map((type) => (
             <TouchableOpacity
               key={type}
               style={[
                 styles.typeButton,
                 recordData.type === type && styles.typeButtonActive,
               ]}
-              onPress={() => setRecordData({ ...recordData, type })}
+              onPress={() => setRecordData({ 
+                ...recordData, 
+                type,
+                unit: getDefaultUnit(type) 
+              })}
             >
               <MaterialCommunityIcons
                 name={getRecordIcon(type)}
-                size={24}
+                size={20}
                 color={
                   recordData.type === type
                     ? theme.colors.background.main
@@ -184,6 +211,34 @@ export default function DailyRecordScreen() {
           placeholderTextColor={theme.colors.text.secondary}
         />
       </View>
+
+      {/* 数量入力（食事、運動、体重の場合） */}
+      {(recordData.type === "meal" || recordData.type === "exercise" || recordData.type === "weight") && (
+        <View style={styles.amountSection}>
+          <Text style={styles.sectionTitle}>
+            {recordData.type === "meal" && "食事量"}
+            {recordData.type === "exercise" && "運動時間"}
+            {recordData.type === "weight" && "体重"}
+          </Text>
+          <View style={styles.amountInputContainer}>
+            <TextInput
+              style={styles.amountInput}
+              value={recordData.amount?.toString() || ""}
+              onChangeText={(text) => {
+                const numericValue = text.trim() === "" ? undefined : parseFloat(text);
+                setRecordData({ 
+                  ...recordData, 
+                  amount: isNaN(numericValue!) ? undefined : numericValue 
+                });
+              }}
+              placeholder="数値を入力"
+              keyboardType="decimal-pad"
+              placeholderTextColor={theme.colors.text.secondary}
+            />
+            <Text style={styles.unitText}>{recordData.unit}</Text>
+          </View>
+        </View>
+      )}
 
       {/* 詳細入力 */}
       <View style={styles.detailSection}>
@@ -269,13 +324,15 @@ const styles = StyleSheet.create({
   typeButtons: {
     flexDirection: "row",
     justifyContent: "space-around",
+    flexWrap: "wrap",
   },
   typeButton: {
     alignItems: "center",
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
     backgroundColor: theme.colors.background.secondary,
-    minWidth: 80,
+    minWidth: 70,
+    marginBottom: theme.spacing.sm,
   },
   typeButtonActive: {
     backgroundColor: theme.colors.primary,
@@ -329,5 +386,28 @@ const styles = StyleSheet.create({
     color: theme.colors.background.main,
     fontSize: 16,
     fontWeight: "600",
+  },
+  amountSection: {
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.background.main,
+    marginBottom: theme.spacing.md,
+  },
+  amountInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  amountInput: {
+    flex: 1,
+    backgroundColor: theme.colors.background.secondary,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    fontSize: 16,
+    color: theme.colors.text.primary,
+    marginRight: theme.spacing.sm,
+  },
+  unitText: {
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+    minWidth: 40,
   },
 });

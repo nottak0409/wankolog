@@ -11,11 +11,12 @@ import PetProfileCard from "../components/molecules/PetProfileCard";
 import type { Notification } from "../types/notification";
 import type { PetProfile } from "../types/profile";
 import { petService, recordService } from "../database/services";
+import { DailySummary } from "../types/record";
 
 export default function HomeScreen() {
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
-  const [todaySummary, setTodaySummary] = useState({
-    weight: 0,
+  const [todaySummary, setTodaySummary] = useState<DailySummary>({
+    weight: undefined,
     mealsCount: 0,
     poopsCount: 0,
     exerciseMinutes: 0,
@@ -43,19 +44,8 @@ export default function HomeScreen() {
   const loadTodayRecords = async (petId: string) => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const todayRecords = await recordService.getByDate(petId, today);
-      
-      // 今日のサマリーを計算
-      const mealRecords = todayRecords.filter(r => r.type === 'meal');
-      const poopRecords = todayRecords.filter(r => r.type === 'poop');
-      const exerciseRecords = todayRecords.filter(r => r.type === 'exercise');
-      
-      setTodaySummary({
-        mealsCount: mealRecords.length,
-        poopsCount: poopRecords.length,
-        exerciseMinutes: exerciseRecords.length * 30, // 仮定: 1回30分
-        weight: 0, // 体重記録がある場合のみ表示
-      });
+      const summary = await recordService.getDailySummary(petId, today);
+      setTodaySummary(summary);
     } catch (error) {
       console.error('Failed to load today records:', error);
     }

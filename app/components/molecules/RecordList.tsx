@@ -12,6 +12,8 @@ const getIconName = (type: Record["type"]) => {
 			return "nutrition";
 		case "exercise":
 			return "walk";
+		case "weight":
+			return "scale";
 		default:
 			return "alert-circle";
 	}
@@ -33,7 +35,12 @@ export const RecordList = ({ records, date }: RecordListProps) => {
 				/>
 			</View>
 			<View style={styles.recordContent}>
-				<Text style={styles.time}>{item.time}</Text>
+				<Text style={styles.time}>
+					{item.time}
+					{item.amount && item.unit && !isNaN(item.amount) && (
+						<Text style={styles.amount}> ({item.amount}{item.unit})</Text>
+					)}
+				</Text>
 				<Text style={styles.detail}>{item.detail}</Text>
 			</View>
 		</View>
@@ -124,5 +131,10 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		color: theme.colors.text.secondary,
 		marginTop: theme.spacing.sm,
+	},
+	amount: {
+		fontSize: 12,
+		color: theme.colors.text.secondary,
+		fontWeight: "normal",
 	},
 });

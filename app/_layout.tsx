@@ -12,7 +12,16 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    initDatabase().catch(console.error);
+    const initDB = async () => {
+      try {
+        console.log('Initializing database...');
+        await initDatabase();
+        console.log('Database initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize database:', error);
+      }
+    };
+    initDB();
   }, []);
 
   return (

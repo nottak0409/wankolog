@@ -67,7 +67,7 @@ export default function HistoryScreen() {
     setRefreshing(false);
   };
 
-  const getRecordIcon = (type: "meal" | "poop" | "exercise") => {
+  const getRecordIcon = (type: "meal" | "poop" | "exercise" | "weight") => {
     switch (type) {
       case "meal":
         return "food";
@@ -75,12 +75,14 @@ export default function HistoryScreen() {
         return "toilet";
       case "exercise":
         return "run";
+      case "weight":
+        return "scale";
       default:
         return "note";
     }
   };
 
-  const getRecordLabel = (type: "meal" | "poop" | "exercise") => {
+  const getRecordLabel = (type: "meal" | "poop" | "exercise" | "weight") => {
     switch (type) {
       case "meal":
         return "食事";
@@ -88,6 +90,8 @@ export default function HistoryScreen() {
         return "うんち";
       case "exercise":
         return "運動";
+      case "weight":
+        return "体重";
       default:
         return "その他";
     }
@@ -175,6 +179,11 @@ export default function HistoryScreen() {
                     <View style={styles.recordHeader}>
                       <Text style={styles.recordType}>
                         {getRecordLabel(record.type)}
+                        {record.amount && record.unit && !isNaN(record.amount) && (
+                          <Text style={styles.recordAmount}>
+                            {" "}({record.amount}{record.unit})
+                          </Text>
+                        )}
                       </Text>
                       <Text style={styles.recordTime}>{record.time}</Text>
                     </View>
@@ -325,5 +334,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.text.secondary,
     lineHeight: 20,
+  },
+  recordAmount: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+    fontWeight: "normal",
   },
 });

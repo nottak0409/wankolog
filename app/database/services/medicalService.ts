@@ -1,9 +1,9 @@
-import { getDatabase } from '../init';
+import { ensureDatabase } from '../init';
 import { MedicalRecord, VaccineRecord, Medication } from '../../types/medical';
 
 export const medicalService = {
   async createMedicalRecord(record: Omit<MedicalRecord, 'id'>): Promise<string> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     
     await db.runAsync(
@@ -30,7 +30,7 @@ export const medicalService = {
   },
 
   async getMedicalRecordById(id: string): Promise<MedicalRecord | null> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const result = await db.getFirstAsync(
       `SELECT * FROM medical_records WHERE id = ?`,
       [id]
@@ -43,7 +43,7 @@ export const medicalService = {
   },
 
   async getMedicalRecordsByPetId(petId: string): Promise<MedicalRecord[]> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const results = await db.getAllAsync(
       `SELECT * FROM medical_records WHERE pet_id = ? ORDER BY date DESC`,
       [petId]
@@ -59,7 +59,7 @@ export const medicalService = {
   },
 
   async updateMedicalRecord(id: string, updates: Partial<Omit<MedicalRecord, 'id' | 'petId'>>): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const fields: string[] = [];
     const values: any[] = [];
     
@@ -98,14 +98,14 @@ export const medicalService = {
   },
 
   async deleteMedicalRecord(id: string): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     await this.deleteMedicationsByRecordId(id);
     await db.runAsync(`DELETE FROM medical_records WHERE id = ?`, [id]);
   },
 
   // 薬関連
   async createMedication(medicalRecordId: string, medication: Omit<Medication, 'id'>): Promise<string> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     
     await db.runAsync(
@@ -118,7 +118,7 @@ export const medicalService = {
   },
 
   async getMedicationsByRecordId(medicalRecordId: string): Promise<Medication[]> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const results = await db.getAllAsync(
       `SELECT * FROM medications WHERE medical_record_id = ?`,
       [medicalRecordId]
@@ -128,13 +128,13 @@ export const medicalService = {
   },
 
   async deleteMedicationsByRecordId(medicalRecordId: string): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     await db.runAsync(`DELETE FROM medications WHERE medical_record_id = ?`, [medicalRecordId]);
   },
 
   // ワクチン関連
   async createVaccineRecord(record: Omit<VaccineRecord, 'id'>): Promise<string> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     
     await db.runAsync(
@@ -154,7 +154,7 @@ export const medicalService = {
   },
 
   async getVaccineRecordsByPetId(petId: string): Promise<VaccineRecord[]> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const results = await db.getAllAsync(
       `SELECT * FROM vaccine_records WHERE pet_id = ? ORDER BY last_date DESC`,
       [petId]
@@ -164,7 +164,7 @@ export const medicalService = {
   },
 
   async updateVaccineRecord(id: string, updates: Partial<Omit<VaccineRecord, 'id' | 'petId'>>): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     const fields: string[] = [];
     const values: any[] = [];
     
@@ -195,7 +195,7 @@ export const medicalService = {
   },
 
   async deleteVaccineRecord(id: string): Promise<void> {
-    const db = getDatabase();
+    const db = await ensureDatabase();
     await db.runAsync(`DELETE FROM vaccine_records WHERE id = ?`, [id]);
   },
 

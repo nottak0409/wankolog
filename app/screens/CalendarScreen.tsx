@@ -1,63 +1,60 @@
 import React, { useState } from "react";
-import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useRouter, useFocusEffect } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CalendarView } from "../components/molecules/CalendarView";
 import { RecordList } from "../components/molecules/RecordList";
 import { Record, RecordsByDate } from "../types/record";
 import { CalendarDay, MarkedDates } from "../types/calendar";
+import { petService, recordService } from "../database/services";
+import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
-
-const mockRecordsByDate: RecordsByDate = {
-  "2025-05-23": [
-    {
-      id: "1",
-      date: "2025-05-23",
-      type: "meal",
-      time: "08:00",
-      detail: "朝ごはん - ドッグフード 100g",
-    },
-    {
-      id: "2",
-      date: "2025-05-23",
-      type: "poop",
-      time: "09:30",
-      detail: "普通の硬さ、茶色",
-    },
-    {
-      id: "3",
-      date: "2025-05-23",
-      type: "exercise",
-      time: "16:00",
-      detail: "散歩 30分、1.5km",
-    },
-  ],
-  "2025-05-22": [
-    {
-      id: "4",
-      date: "2025-05-22",
-      type: "meal",
-      time: "07:30",
-      detail: "朝ごはん - ドッグフード 100g",
-    },
-    {
-      id: "5",
-      date: "2025-05-22",
-      type: "exercise",
-      time: "15:00",
-      detail: "散歩 45分、2km",
-    },
-  ],
-};
 
 export const CalendarScreen = () => {
   const router = useRouter();
+  const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
   const [records, setRecords] = useState<Record[]>([]);
+  const [recordsByDate, setRecordsByDate] = useState<RecordsByDate>({});
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const pets = await petService.getAll();
+      if (pets.length > 0) {
+        const pet = pets[0];
+        setCurrentPet(pet);
+        
+        // 過去60日の記録を取得
+        const endDate = new Date().toISOString().split('T')[0];
+        const startDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+          .toISOString().split('T')[0];
+        
+        const recordsByDateData = await recordService.getByDateRange(
+          pet.id,
+          startDate,
+          endDate
+        );
+        
+        setRecordsByDate(recordsByDateData);
+      }
+    } catch (error) {
+      console.error("データの読み込みエラー:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDayPress = (day: CalendarDay) => {
     setSelectedDate(day.dateString);
-    setRecords(mockRecordsByDate[day.dateString] || []);
+    setRecords(recordsByDate[day.dateString] || []);
   };
 
   const handleAddRecord = () => {
@@ -71,7 +68,7 @@ export const CalendarScreen = () => {
 
   const getMarkedDates = (): MarkedDates => {
     const dates: MarkedDates = {};
-    Object.keys(mockRecordsByDate).forEach((date) => {
+    Object.keys(recordsByDate).forEach((date) => {
       dates[date] = {
         marked: true,
         dotColor: theme.colors.primary,
@@ -86,6 +83,14 @@ export const CalendarScreen = () => {
     return dates;
   };
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content}>
@@ -95,7 +100,7 @@ export const CalendarScreen = () => {
         />
         <View style={styles.recordSection}>
           <RecordList records={records} date={selectedDate} />
-          {selectedDate && (
+          {selectedDate && currentPet && (
             <TouchableOpacity
               style={styles.addButton}
               onPress={handleAddRecord}
@@ -117,6 +122,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1,
