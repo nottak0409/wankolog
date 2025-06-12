@@ -1,7 +1,7 @@
 import { ensureDatabase } from '../init';
 import { MedicalRecord, VaccineRecord, Medication } from '../../types/medical';
 import { notificationService } from '../../services/notificationService';
-import { isVaccineNotificationEnabled } from '../../screens/NotificationSettingsScreen';
+import { isVaccineNotificationEnabled } from '../../(tabs)/settings';
 
 export const medicalService = {
   async createMedicalRecord(record: Omit<MedicalRecord, 'id'>): Promise<string> {
