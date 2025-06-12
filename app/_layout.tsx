@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -6,9 +6,15 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Provider as PaperProvider } from "react-native-paper";
 import theme from "./constants/theme";
+import { initDatabase } from "./database/init";
 
 export default function RootLayout() {
   const router = useRouter();
+
+  useEffect(() => {
+    initDatabase().catch(console.error);
+  }, []);
+
   return (
     <PaperProvider>
       <SafeAreaProvider>

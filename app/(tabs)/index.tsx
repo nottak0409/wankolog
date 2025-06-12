@@ -1,14 +1,36 @@
 import { StyleSheet, View, ScrollView } from "react-native";
 import { Text } from "react-native";
+import { useEffect, useState } from "react";
 import { colors, spacing } from "../constants/theme";
 import DailySummaryCard from "../components/molecules/DailySummaryCard";
 import WeeklySummaryCard from "../components/molecules/WeeklySummaryCard";
 import NotificationBanner from "../components/molecules/NotificationBanner";
 import PetProfileCard from "../components/molecules/PetProfileCard";
 import type { Notification } from "../types/notification";
+import type { PetProfile } from "../types/profile";
+import { petService, recordService } from "../database/services";
 
 export default function HomeScreen() {
-  // 仮データ（後でReduxやAPI連携に差し替え）
+  const [pets, setPets] = useState<PetProfile[]>([]);
+  const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
+
+  useEffect(() => {
+    loadPets();
+  }, []);
+
+  const loadPets = async () => {
+    try {
+      const allPets = await petService.getAll();
+      setPets(allPets);
+      if (allPets.length > 0) {
+        setCurrentPet(allPets[0]); // 最初のペットを選択
+      }
+    } catch (error) {
+      console.error('Failed to load pets:', error);
+    }
+  };
+
+  // 仮データ（後でデータベースから取得）
   const todaySummary = {
     weight: 6.2,
     mealsCount: 2,
@@ -91,10 +113,14 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <PetProfileCard
-        name="ポチ"
-        imageUrl="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"
-      />
+      {currentPet ? (
+        <PetProfileCard
+          name={currentPet.name}
+          imageUrl={currentPet.photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"}
+        />
+      ) : (
+        <Text style={styles.noPetText}>ペットを登録してください</Text>
+      )}
       <DailySummaryCard {...todaySummary} />
       <WeeklySummaryCard data={weekSummary} />
       <NotificationBanner notifications={notifications} />
@@ -110,5 +136,11 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+  },
+  noPetText: {
+    textAlign: 'center',
+    color: colors.text.secondary,
+    fontSize: 16,
+    marginVertical: spacing.lg,
   },
 });
