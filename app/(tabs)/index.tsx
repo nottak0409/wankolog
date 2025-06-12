@@ -12,6 +12,7 @@ import { petService, recordService } from "../database/services";
 import { DailySummary } from "../types/record";
 import { notificationItemService, NotificationItem } from "../services/notificationItemService";
 import { getJapanToday } from "../utils/dateUtils";
+import { debugLog } from "../utils/debugUtils";
 
 export default function HomeScreen() {
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
@@ -22,6 +23,7 @@ export default function HomeScreen() {
     exerciseMinutes: 0,
   });
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [weekSummaries, setWeekSummaries] = useState<Record<string, DailySummary>>({});
   const lastLoadedDate = useRef<string>('');
   const router = useRouter();
 
@@ -37,10 +39,11 @@ export default function HomeScreen() {
     const checkDateChange = () => {
       const today = getJapanToday(); // 日本時間の今日
       if (lastLoadedDate.current && lastLoadedDate.current !== today) {
-        console.log('日付が変わりました (JST):', lastLoadedDate.current, '->', today);
-        // 日付が変わったら今日のデータを再読み込み
+        debugLog.date('日付が変わりました (JST):', lastLoadedDate.current, '->', today);
+        // 日付が変わったら今日のデータと週間データを再読み込み
         if (currentPet) {
           loadTodayRecords(currentPet.id);
+          loadWeekSummaries(currentPet.id);
         }
         loadNotifications(); // 通知も再生成
       }
@@ -60,11 +63,12 @@ export default function HomeScreen() {
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === 'active') {
-        console.log('アプリがアクティブになりました');
+        debugLog.log('アプリがアクティブになりました');
         const today = getJapanToday(); // 日本時間の今日
         if (lastLoadedDate.current !== today && currentPet) {
-          console.log('日付が変わったため再読み込み (JST):', lastLoadedDate.current, '->', today);
+          debugLog.date('日付が変わったため再読み込み (JST):', lastLoadedDate.current, '->', today);
           loadTodayRecords(currentPet.id);
+          loadWeekSummaries(currentPet.id);
           loadNotifications();
         }
       }
@@ -80,29 +84,55 @@ export default function HomeScreen() {
       if (allPets.length > 0) {
         setCurrentPet(allPets[0]); // 最初のペットを選択
         await loadTodayRecords(allPets[0].id);
+        await loadWeekSummaries(allPets[0].id); // 週間データも読み込み
       }
     } catch (error) {
-      console.error('Failed to load pets:', error);
+      debugLog.error('Failed to load pets:', error);
     }
   };
 
   const loadTodayRecords = async (petId: string) => {
     try {
       const today = getJapanToday(); // 日本時間の今日を使用
-      console.log('今日のデータを読み込み中 (JST):', today);
+      debugLog.log('今日のデータを読み込み中 (JST):', today);
       
       const summary = await recordService.getDailySummary(petId, today);
       setTodaySummary(summary);
       lastLoadedDate.current = today;
     } catch (error) {
-      console.error('Failed to load today records:', error);
+      debugLog.error('Failed to load today records:', error);
+    }
+  };
+
+  const loadWeekSummaries = async (petId: string) => {
+    try {
+      const summaries: Record<string, DailySummary> = {};
+      
+      debugLog.log('過去7日間のデータを読み込み中...');
+      
+      // 過去7日間のデータを取得（今日を含む）
+      for (let i = 0; i < 7; i++) {
+        const date = new Date();
+        // 日本時間ベースで計算
+        const japanTime = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+        japanTime.setDate(japanTime.getDate() - i);
+        const dateStr = japanTime.toISOString().split('T')[0];
+        
+        const summary = await recordService.getDailySummary(petId, dateStr);
+        summaries[dateStr] = summary;
+      }
+      
+      setWeekSummaries(summaries);
+      debugLog.log('過去7日間のデータ読み込み完了:', Object.keys(summaries));
+    } catch (error) {
+      debugLog.error('Failed to load week summaries:', error);
     }
   };
 
   const loadNotifications = async () => {
     try {
       const generatedNotifications = await notificationItemService.generateNotifications();
-      console.log('生成された通知:', generatedNotifications);
+      debugLog.notification('生成された通知:', generatedNotifications);
       
       // 却下された通知を除外
       const filteredNotifications = [];
@@ -112,10 +142,10 @@ export default function HomeScreen() {
           filteredNotifications.push(notification);
         }
       }
-      console.log('フィルタ後の通知:', filteredNotifications);
+      debugLog.notification('フィルタ後の通知:', filteredNotifications);
       setNotifications(filteredNotifications);
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      debugLog.error('Failed to load notifications:', error);
     }
   };
 
@@ -124,16 +154,49 @@ export default function HomeScreen() {
     setNotifications(prev => prev.filter(n => n.id !== notificationId));
   };
 
-  // 過去一週間のサマリー（実装可能だが今回は仮データを使用）
-  const weekSummary = [
-    {
-      date: "今日",
-      weight: 0,
-      mealsCount: todaySummary.mealsCount,
-      poopsCount: todaySummary.poopsCount,
-      exerciseMinutes: todaySummary.exerciseMinutes,
-    },
-  ];
+  // 過去7日間のサマリーを日付順（新しい順：今日から過去へ）で取得
+  const getWeekSummaryData = () => {
+    const weekData = [];
+    
+    // 過去7日間（今日を含む）を新しい順で生成（今日が最初）
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      const japanTime = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+      japanTime.setDate(japanTime.getDate() - i);
+      const dateStr = japanTime.toISOString().split('T')[0];
+      
+      const summary = weekSummaries[dateStr] || {
+        weight: undefined,
+        mealsCount: 0,
+        poopsCount: 0,
+        exerciseMinutes: 0,
+      };
+      
+      // 日付ラベルを設定
+      let dateLabel = dateStr;
+      if (i === 0) {
+        dateLabel = '今日';
+      } else if (i === 1) {
+        dateLabel = '昨日';
+      } else {
+        // MM/DD形式で表示
+        const month = japanTime.getMonth() + 1;
+        const day = japanTime.getDate();
+        dateLabel = `${month}/${day}`;
+      }
+      
+      weekData.push({
+        date: dateLabel,
+        dateStr: dateStr,
+        weight: summary.weight || 0,
+        mealsCount: summary.mealsCount,
+        poopsCount: summary.poopsCount,
+        exerciseMinutes: summary.exerciseMinutes,
+      });
+    }
+    
+    return weekData;
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -158,7 +221,7 @@ export default function HomeScreen() {
       />
 
       <DailySummaryCard {...todaySummary} />
-      <WeeklySummaryCard data={weekSummary} />
+      <WeeklySummaryCard data={getWeekSummaryData()} />
       
       {/* 記録追加ボタン */}
       <TouchableOpacity 

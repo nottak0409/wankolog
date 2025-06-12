@@ -10,6 +10,7 @@ import { petService, recordService } from "../database/services";
 import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
 import { getJapanToday } from "../utils/dateUtils";
+import { debugLog } from "../utils/debugUtils";
 
 export const CalendarScreen = () => {
   const router = useRouter();
@@ -34,7 +35,7 @@ export const CalendarScreen = () => {
     const checkDateChange = () => {
       const today = getJapanToday(); // 日本時間の今日
       if (lastUpdateDate.current && lastUpdateDate.current !== today) {
-        console.log('カレンダー画面: 日付が変わりました (JST):', lastUpdateDate.current, '->', today);
+        debugLog.date('カレンダー画面: 日付が変わりました (JST):', lastUpdateDate.current, '->', today);
         // 日付が変わったらデータを再読み込み
         loadData();
         // 選択日付も今日に更新（ユーザーが他の日付を選択していない場合のみ）
@@ -58,10 +59,10 @@ export const CalendarScreen = () => {
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === 'active') {
-        console.log('カレンダー画面: アプリがアクティブになりました');
+        debugLog.log('カレンダー画面: アプリがアクティブになりました');
         const today = getJapanToday(); // 日本時間の今日
         if (lastUpdateDate.current !== today) {
-          console.log('カレンダー画面: 日付が変わったため再読み込み (JST):', lastUpdateDate.current, '->', today);
+          debugLog.date('カレンダー画面: 日付が変わったため再読み込み (JST):', lastUpdateDate.current, '->', today);
           loadData();
           // 選択日付も今日に更新（ユーザーが他の日付を選択していない場合のみ）
           if (selectedDate === lastUpdateDate.current) {
@@ -88,7 +89,7 @@ export const CalendarScreen = () => {
         const startDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
           .toISOString().split('T')[0];
         
-        console.log('カレンダー画面: データを読み込み中 (JST):', endDate);
+        debugLog.log('カレンダー画面: データを読み込み中 (JST):', endDate);
         const recordsByDateData = await recordService.getByDateRange(
           pet.id,
           startDate,
@@ -102,7 +103,7 @@ export const CalendarScreen = () => {
         setRecords(recordsByDateData[selectedDate] || []);
       }
     } catch (error) {
-      console.error("データの読み込みエラー:", error);
+      debugLog.error("データの読み込みエラー:", error);
     } finally {
       setLoading(false);
     }

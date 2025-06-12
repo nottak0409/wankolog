@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { debugLog } from '../utils/debugUtils';
 
 // 通知の設定
 Notifications.setNotificationHandler({
@@ -41,7 +42,7 @@ export const notificationService = {
       
       return finalStatus === 'granted';
     } catch (error) {
-      console.error('通知権限の要求エラー:', error);
+      debugLog.error('通知権限の要求エラー:', error);
       return false;
     }
   },
@@ -51,13 +52,13 @@ export const notificationService = {
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-        console.warn('通知権限が拒否されました');
+        debugLog.warn('通知権限が拒否されました');
         return null;
       }
 
       const now = new Date();
       if (notification.trigger <= now) {
-        console.warn('過去の日時には通知をスケジュールできません');
+        debugLog.warn('過去の日時には通知をスケジュールできません');
         return null;
       }
 
@@ -70,7 +71,7 @@ export const notificationService = {
         trigger: null, // 即座に表示
       });
 
-      console.log('通知をスケジュールしました:', {
+      debugLog.notification('通知をスケジュールしました:', {
         id: notificationId,
         title: notification.title,
         trigger: notification.trigger,
@@ -78,7 +79,7 @@ export const notificationService = {
 
       return notificationId;
     } catch (error) {
-      console.error('通知のスケジュールエラー:', error);
+      debugLog.error('通知のスケジュールエラー:', error);
       return null;
     }
   },
@@ -87,9 +88,9 @@ export const notificationService = {
   async cancelNotification(notificationId: string): Promise<void> {
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log('通知をキャンセルしました:', notificationId);
+      debugLog.notification('通知をキャンセルしました:', notificationId);
     } catch (error) {
-      console.error('通知のキャンセルエラー:', error);
+      debugLog.error('通知のキャンセルエラー:', error);
     }
   },
 
@@ -97,9 +98,9 @@ export const notificationService = {
   async cancelAllNotifications(): Promise<void> {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      console.log('すべての通知をキャンセルしました');
+      debugLog.notification('すべての通知をキャンセルしました');
     } catch (error) {
-      console.error('すべての通知のキャンセルエラー:', error);
+      debugLog.error('すべての通知のキャンセルエラー:', error);
     }
   },
 
@@ -108,7 +109,7 @@ export const notificationService = {
     try {
       return await Notifications.getAllScheduledNotificationsAsync();
     } catch (error) {
-      console.error('スケジュールされた通知の取得エラー:', error);
+      debugLog.error('スケジュールされた通知の取得エラー:', error);
       return [];
     }
   },
@@ -124,7 +125,7 @@ export const notificationService = {
     const now = new Date();
 
     if (oneWeekBefore <= now) {
-      console.warn('ワクチン接種日まで1週間を切っているため通知をスケジュールしません');
+      debugLog.warn('ワクチン接種日まで1週間を切っているため通知をスケジュールしません');
       return null;
     }
 
@@ -171,7 +172,7 @@ export const notificationService = {
   // デバッグ用: すべてのスケジュールされた通知を表示
   async logScheduledNotifications(): Promise<void> {
     const notifications = await this.getScheduledNotifications();
-    console.log('スケジュールされた通知:', notifications.map(n => ({
+    debugLog.notification('スケジュールされた通知:', notifications.map(n => ({
       id: n.identifier,
       title: n.content.title,
       trigger: n.trigger,

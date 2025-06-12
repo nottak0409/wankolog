@@ -9,6 +9,7 @@ import theme from "./constants/theme";
 import { initDatabase } from "./database/init";
 import { notificationService } from "./services/notificationService";
 import * as Notifications from 'expo-notifications';
+import { debugLog } from "./utils/debugUtils";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -17,9 +18,9 @@ export default function RootLayout() {
     const initApp = async () => {
       try {
         // データベースの初期化
-        console.log('Initializing database...');
+        debugLog.db('Initializing database...');
         await initDatabase();
-        console.log('Database initialized successfully');
+        debugLog.db('Database initialized successfully');
         
         // 通知権限の要求
         await notificationService.requestPermissions();
@@ -27,13 +28,13 @@ export default function RootLayout() {
         // 通知リスナーの設定
         const notificationListener = notificationService.addNotificationListener(
           (notification) => {
-            console.log('通知を受信:', notification);
+            debugLog.notification('通知を受信:', notification);
           }
         );
         
         const responseListener = notificationService.addNotificationResponseListener(
           (response) => {
-            console.log('通知に対するユーザーのアクション:', response);
+            debugLog.notification('通知に対するユーザーのアクション:', response);
             
             // ワクチン通知の場合、履歴画面に遷移
             if (response.notification.request.content.data?.type === 'vaccine_reminder') {
@@ -49,7 +50,7 @@ export default function RootLayout() {
         };
         
       } catch (error) {
-        console.error('Failed to initialize app:', error);
+        debugLog.error('Failed to initialize app:', error);
       }
     };
     

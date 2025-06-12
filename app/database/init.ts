@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { debugLog } from '../utils/debugUtils';
 
 const DATABASE_NAME = 'wankolog.db';
 const CURRENT_SCHEMA_VERSION = 3; // notification_enabled列を削除
@@ -23,7 +24,7 @@ export const getDatabase = (): SQLite.SQLiteDatabase => {
 
 export const ensureDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   if (!db) {
-    console.log('Database not initialized, initializing now...');
+    debugLog.db('Database not initialized, initializing now...');
     return await initDatabase();
   }
   return db;
@@ -48,7 +49,7 @@ const migrateDatabase = async (): Promise<void> => {
     const currentVersion = result?.version || 0;
 
     if (currentVersion < CURRENT_SCHEMA_VERSION) {
-      console.log(`Migrating database from version ${currentVersion} to ${CURRENT_SCHEMA_VERSION}`);
+      debugLog.db(`Migrating database from version ${currentVersion} to ${CURRENT_SCHEMA_VERSION}`);
       
       // バージョン1→2: daily_recordsテーブルにamountとunitカラムを追加
       if (currentVersion < 2) {
@@ -60,12 +61,12 @@ const migrateDatabase = async (): Promise<void> => {
           
           if (!hasAmountColumn) {
             await db.execAsync(`ALTER TABLE daily_records ADD COLUMN amount REAL;`);
-            console.log('Added amount column to daily_records');
+            debugLog.db('Added amount column to daily_records');
           }
           
           if (!hasUnitColumn) {
             await db.execAsync(`ALTER TABLE daily_records ADD COLUMN unit TEXT;`);
-            console.log('Added unit column to daily_records');
+            debugLog.db('Added unit column to daily_records');
           }
           
           // typeカラムのCHECK制約を更新（weightを追加）
@@ -96,9 +97,9 @@ const migrateDatabase = async (): Promise<void> => {
           await db.execAsync(`DROP TABLE daily_records;`);
           await db.execAsync(`ALTER TABLE daily_records_new RENAME TO daily_records;`);
           
-          console.log('Migrated daily_records table structure');
+          debugLog.db('Migrated daily_records table structure');
         } catch {
-          console.log('Migration already completed or table structure is up to date');
+          debugLog.db('Migration already completed or table structure is up to date');
         }
       }
 
@@ -143,10 +144,10 @@ const migrateDatabase = async (): Promise<void> => {
               END;
             `);
             
-            console.log('Removed notification_enabled column from vaccine_records');
+            debugLog.db('Removed notification_enabled column from vaccine_records');
           }
         } catch {
-          console.log('Vaccine records migration already completed or column does not exist');
+          debugLog.db('Vaccine records migration already completed or column does not exist');
         }
       }
 
@@ -155,10 +156,10 @@ const migrateDatabase = async (): Promise<void> => {
         INSERT OR REPLACE INTO schema_version (version) VALUES (${CURRENT_SCHEMA_VERSION});
       `);
       
-      console.log(`Database migration completed to version ${CURRENT_SCHEMA_VERSION}`);
+      debugLog.db(`Database migration completed to version ${CURRENT_SCHEMA_VERSION}`);
     }
   } catch (error) {
-    console.error('Database migration error:', error);
+    debugLog.error('Database migration error:', error);
   }
 };
 

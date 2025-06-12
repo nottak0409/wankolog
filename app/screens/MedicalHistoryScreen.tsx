@@ -9,6 +9,7 @@ import { notificationService } from "../services/notificationService";
 import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
 import type { VaccineRecord, MedicalRecord } from "../types/medical";
+import { debugLog } from "../utils/debugUtils";
 
 export default function MedicalHistoryScreen() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function MedicalHistoryScreen() {
   useEffect(() => {
     if (vaccineId) {
       // TODO: 該当のワクチン情報までスクロール
-      console.log("Scroll to vaccine:", vaccineId);
+      debugLog.log("Scroll to vaccine:", vaccineId);
     }
   }, [vaccineId]);
 

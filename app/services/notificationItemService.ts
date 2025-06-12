@@ -2,6 +2,7 @@ import { petService, medicalService, recordService } from '../database/services'
 import { isVaccineNotificationEnabled } from '../(tabs)/settings';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getJapanToday } from '../utils/dateUtils';
+import { debugLog } from '../utils/debugUtils';
 
 export interface NotificationItem {
   id: string;
@@ -36,7 +37,7 @@ export const notificationItemService = {
         return priorityOrder[b.priority] - priorityOrder[a.priority];
       });
     } catch (error) {
-      console.error('お知らせ生成エラー:', error);
+      debugLog.error('お知らせ生成エラー:', error);
       return [];
     }
   },
@@ -92,7 +93,7 @@ export const notificationItemService = {
         }
       }
     } catch (error) {
-      console.error('ワクチン通知チェックエラー:', error);
+      debugLog.error('ワクチン通知チェックエラー:', error);
     }
     
     return notifications;
@@ -144,7 +145,7 @@ export const notificationItemService = {
       
       return null;
     } catch (error) {
-      console.error('日次記録チェックエラー:', error);
+      debugLog.error('日次記録チェックエラー:', error);
       return null;
     }
   },
@@ -159,7 +160,7 @@ export const notificationItemService = {
       
       await AsyncStorage.setItem(dismissedKey, JSON.stringify(dismissed));
     } catch (error) {
-      console.error('通知却下の保存エラー:', error);
+      debugLog.error('通知却下の保存エラー:', error);
     }
   },
 
@@ -170,7 +171,7 @@ export const notificationItemService = {
       const dismissed = existing ? JSON.parse(existing) : [];
       return dismissed.includes(notificationId);
     } catch (error) {
-      console.error('通知却下状態の確認エラー:', error);
+      debugLog.error('通知却下状態の確認エラー:', error);
       return false;
     }
   }
