@@ -77,6 +77,10 @@ export default function RootLayout() {
             name="medical-record-edit"
             options={{ title: "通院・治療の記録" }}
           />
+          <Stack.Screen
+            name="vaccine-record-edit"
+            options={{ title: "ワクチン記録" }}
+          />
         </Stack>
       </SafeAreaProvider>
     </PaperProvider>

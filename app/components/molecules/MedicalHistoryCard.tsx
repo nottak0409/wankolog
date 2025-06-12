@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MedicalRecord } from "../../types/medical";
 import theme from "../../constants/theme";
@@ -7,11 +7,15 @@ import theme from "../../constants/theme";
 interface MedicalHistoryCardProps {
   record?: MedicalRecord;
   records?: MedicalRecord[];
+  onEditRecord?: (record: MedicalRecord) => void;
+  onDeleteRecord?: (record: MedicalRecord) => void;
 }
 
 export const MedicalHistoryCard: React.FC<MedicalHistoryCardProps> = ({
   record,
   records = [],
+  onEditRecord,
+  onDeleteRecord,
 }) => {
   const recordsToDisplay = record ? [record] : records;
 
@@ -59,6 +63,34 @@ export const MedicalHistoryCard: React.FC<MedicalHistoryCardProps> = ({
                   : "治療"}
               </Text>
             </View>
+            {(onEditRecord || onDeleteRecord) && (
+              <View style={styles.actionButtons}>
+                {onEditRecord && (
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => onEditRecord(record)}
+                  >
+                    <MaterialCommunityIcons
+                      name="pencil"
+                      size={18}
+                      color={theme.colors.primary}
+                    />
+                  </TouchableOpacity>
+                )}
+                {onDeleteRecord && (
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => onDeleteRecord(record)}
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={18}
+                      color={theme.colors.error}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
           </View>
 
           <View style={styles.content}>
@@ -160,5 +192,14 @@ const styles = StyleSheet.create({
   nextAppointmentText: {
     fontSize: 14,
     color: theme.colors.text.primary,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    gap: theme.spacing.xs,
+  },
+  actionButton: {
+    padding: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.background.main,
   },
 });
