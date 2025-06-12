@@ -59,19 +59,6 @@ export default function MedicalHistoryScreen() {
     router.push("/medical-record-edit");
   };
 
-  const handleNotificationToggle = async (vaccineId: string, enabled: boolean) => {
-    try {
-      if (!currentPet) return;
-      
-      await medicalService.updateVaccineRecord(vaccineId, {
-        notificationEnabled: enabled,
-        petName: currentPet.name,
-      });
-      await loadData(); // データを再読み込み
-    } catch (error) {
-      console.error("通知設定の更新エラー:", error);
-    }
-  };
 
   const handleEditMedicalRecord = (record: MedicalRecord) => {
     router.push({
@@ -163,14 +150,12 @@ export default function MedicalHistoryScreen() {
       
       // 有効なワクチン記録に対して通知を再スケジュール
       for (const vaccine of vaccineRecords) {
-        if (vaccine.notificationEnabled) {
-          await notificationService.scheduleVaccineNotification(
-            vaccine.id,
-            vaccine.type,
-            currentPet.name,
-            vaccine.nextDate
-          );
-        }
+        await notificationService.scheduleVaccineNotification(
+          vaccine.id,
+          vaccine.type,
+          currentPet.name,
+          vaccine.nextDate
+        );
       }
       
       Alert.alert('成功', '通知を再スケジュールしました');
@@ -208,7 +193,6 @@ export default function MedicalHistoryScreen() {
         />
         <VaccineManagement
           vaccines={vaccineRecords}
-          onNotificationToggle={handleNotificationToggle}
           onEditVaccine={handleEditVaccineRecord}
           onDeleteVaccine={handleDeleteVaccineRecord}
           onAddVaccine={handleAddVaccine}

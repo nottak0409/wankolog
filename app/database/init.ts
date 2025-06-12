@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 const DATABASE_NAME = 'wankolog.db';
-const CURRENT_SCHEMA_VERSION = 2; // バージョンを上げました
+const CURRENT_SCHEMA_VERSION = 3; // notification_enabled列を削除
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -102,6 +102,54 @@ const migrateDatabase = async (): Promise<void> => {
         }
       }
 
+      // バージョン2→3: vaccine_recordsテーブルからnotification_enabledカラムを削除
+      if (currentVersion < 3) {
+        try {
+          // カラムが存在するかチェック
+          const tableInfo = await db.getAllAsync(`PRAGMA table_info(vaccine_records)`);
+          const hasNotificationColumn = tableInfo.some((col: any) => col.name === 'notification_enabled');
+          
+          if (hasNotificationColumn) {
+            // SQLiteでは列を直接削除できないため、新しいテーブルを作成して移行
+            await db.execAsync(`
+              CREATE TABLE vaccine_records_new (
+                id TEXT PRIMARY KEY,
+                pet_id TEXT NOT NULL REFERENCES pets(id),
+                type TEXT NOT NULL,
+                last_date TEXT NOT NULL,
+                next_date TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+              );
+            `);
+            
+            // データを移行（notification_enabled列を除く）
+            await db.execAsync(`
+              INSERT INTO vaccine_records_new 
+              SELECT id, pet_id, type, last_date, next_date, created_at, updated_at 
+              FROM vaccine_records;
+            `);
+            
+            // 古いテーブルを削除して新しいテーブルをリネーム
+            await db.execAsync(`DROP TABLE vaccine_records;`);
+            await db.execAsync(`ALTER TABLE vaccine_records_new RENAME TO vaccine_records;`);
+            
+            // インデックスとトリガーを再作成
+            await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_vaccine_records_pet_id ON vaccine_records(pet_id);`);
+            await db.execAsync(`
+              CREATE TRIGGER IF NOT EXISTS update_vaccine_records_timestamp 
+              AFTER UPDATE ON vaccine_records BEGIN
+                UPDATE vaccine_records SET updated_at = datetime('now') WHERE id = NEW.id;
+              END;
+            `);
+            
+            console.log('Removed notification_enabled column from vaccine_records');
+          }
+        } catch (error) {
+          console.log('Vaccine records migration already completed or column does not exist');
+        }
+      }
+
       // バージョンを更新
       await db.execAsync(`
         INSERT OR REPLACE INTO schema_version (version) VALUES (${CURRENT_SCHEMA_VERSION});
@@ -180,7 +228,6 @@ const createTables = async (): Promise<void> => {
       type TEXT NOT NULL,
       last_date TEXT NOT NULL,
       next_date TEXT NOT NULL,
-      notification_enabled INTEGER NOT NULL DEFAULT 1,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );

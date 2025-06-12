@@ -21,7 +21,6 @@ export interface VaccineRecord {
   type: string;
   lastDate: Date;
   nextDate: Date;
-  notificationEnabled: boolean;
 }
 
 export type MedicalRecordType = "vaccine" | "checkup" | "treatment";

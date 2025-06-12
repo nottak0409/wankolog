@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   TextInput,
   TouchableOpacity,
-  Switch,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -30,7 +29,6 @@ export default function VaccineRecordInputScreen() {
     type: "",
     lastDate: new Date(),
     nextDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1年後
-    notificationEnabled: true,
   });
 
   const [showLastDatePicker, setShowLastDatePicker] = useState(false);
@@ -72,7 +70,6 @@ export default function VaccineRecordInputScreen() {
           type: record.type,
           lastDate: record.lastDate,
           nextDate: record.nextDate,
-          notificationEnabled: record.notificationEnabled,
         });
       }
     } catch (error) {
@@ -228,30 +225,6 @@ export default function VaccineRecordInputScreen() {
         )}
       </View>
 
-      {/* 通知設定 */}
-      <View style={styles.notificationSection}>
-        <Text style={styles.sectionTitle}>通知設定</Text>
-        <View style={styles.notificationContainer}>
-          <View style={styles.notificationInfo}>
-            <Text style={styles.notificationLabel}>通知を有効にする</Text>
-            <Text style={styles.notificationDescription}>
-              次回予定日の1週間前に通知が届きます
-            </Text>
-          </View>
-          <Switch
-            value={formData.notificationEnabled}
-            onValueChange={(value) =>
-              setFormData({ ...formData, notificationEnabled: value })
-            }
-            trackColor={{ false: "#767577", true: theme.colors.primary }}
-            thumbColor={
-              formData.notificationEnabled
-                ? theme.colors.background.main
-                : "#f4f3f4"
-            }
-          />
-        </View>
-      </View>
 
       <TouchableOpacity
         style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
@@ -327,31 +300,6 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
     fontSize: 16,
     color: theme.colors.text.primary,
-  },
-  notificationSection: {
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.background.main,
-    marginBottom: theme.spacing.md,
-  },
-  notificationContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  notificationInfo: {
-    flex: 1,
-    marginRight: theme.spacing.md,
-  },
-  notificationLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  notificationDescription: {
-    fontSize: 12,
-    color: theme.colors.text.secondary,
-    lineHeight: 16,
   },
   submitButton: {
     margin: theme.spacing.md,

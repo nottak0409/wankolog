@@ -1,198 +1,196 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
   Switch,
-  TouchableOpacity,
-  SafeAreaView,
+  Alert,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  NotificationSetting,
-  DEFAULT_NOTIFICATION_SETTINGS,
-  FREQUENCY_OPTIONS,
-} from "../types/notification";
-import { TimePicker } from "../components/molecules/TimePicker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { notificationService } from "../services/notificationService";
+import { petService, medicalService } from "../database/services";
 import theme from "../constants/theme";
 
-const getNotificationTypeIcon = (type: string) => {
-  switch (type) {
-    case "vaccine":
-      return "needle";
-    case "medication":
-      return "pill";
-    case "health_check":
-      return "stethoscope";
-    default:
-      return "bell";
-  }
-};
-
-const getNotificationTypeLabel = (type: string) => {
-  switch (type) {
-    case "vaccine":
-      return "ワクチン通知";
-    case "medication":
-      return "投薬通知";
-    case "health_check":
-      return "健康チェック通知";
-    default:
-      return "通知";
-  }
-};
+const VACCINE_NOTIFICATION_KEY = 'vaccineNotificationEnabled';
 
 export default function NotificationSettingsScreen() {
-  const [settings, setSettings] = useState<NotificationSetting[]>(
-    DEFAULT_NOTIFICATION_SETTINGS
-  );
+  const [vaccineNotificationEnabled, setVaccineNotificationEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const handleToggle = (id: string, enabled: boolean) => {
-    setSettings((prev) =>
-      prev.map((setting) =>
-        setting.id === id ? { ...setting, enabled } : setting
-      )
-    );
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(VACCINE_NOTIFICATION_KEY);
+      if (stored !== null) {
+        setVaccineNotificationEnabled(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('設定の読み込みエラー:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleTimeChange = (id: string, time: string) => {
-    setSettings((prev) =>
-      prev.map((setting) =>
-        setting.id === id ? { ...setting, time } : setting
-      )
-    );
+  const handleVaccineNotificationToggle = async (enabled: boolean) => {
+    try {
+      setVaccineNotificationEnabled(enabled);
+      await AsyncStorage.setItem(VACCINE_NOTIFICATION_KEY, JSON.stringify(enabled));
+      
+      if (enabled) {
+        // 通知を有効にした場合、すべてのワクチン記録に対して通知をスケジュール
+        await rescheduleAllVaccineNotifications();
+      } else {
+        // 通知を無効にした場合、すべてのワクチン通知をキャンセル
+        await notificationService.cancelAllNotifications();
+      }
+      
+      Alert.alert(
+        '成功',
+        enabled 
+          ? 'ワクチン通知を有効にしました'
+          : 'ワクチン通知を無効にしました'
+      );
+    } catch (error) {
+      console.error('設定の保存エラー:', error);
+      Alert.alert('エラー', '設定の保存に失敗しました');
+      // エラー時は元の状態に戻す
+      setVaccineNotificationEnabled(!enabled);
+    }
   };
 
-  const handleFrequencyChange = (id: string, frequency: string) => {
-    setSettings((prev) =>
-      prev.map((setting) =>
-        setting.id === id
-          ? {
-              ...setting,
-              frequency: frequency as "daily" | "weekly" | "monthly" | "custom",
-            }
-          : setting
-      )
-    );
+  const rescheduleAllVaccineNotifications = async () => {
+    try {
+      const pets = await petService.getAll();
+      if (pets.length === 0) return;
+      
+      const pet = pets[0];
+      const vaccines = await medicalService.getVaccineRecordsByPetId(pet.id);
+      
+      for (const vaccine of vaccines) {
+        await notificationService.scheduleVaccineNotification(
+          vaccine.id,
+          vaccine.type,
+          pet.name,
+          vaccine.nextDate
+        );
+      }
+    } catch (error) {
+      console.error('ワクチン通知の再スケジュールエラー:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <Text style={styles.loadingText}>読み込み中...</Text>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <ScrollView style={styles.scrollView}>
-          <Text style={styles.title}>🔔 通知設定</Text>
-
-          {settings.map((setting) => (
-            <View key={setting.id} style={styles.settingCard}>
-              <View style={styles.header}>
-                <View style={styles.titleContainer}>
-                  <MaterialCommunityIcons
-                    name={getNotificationTypeIcon(setting.type)}
-                    size={24}
-                    color={theme.colors.primary}
-                  />
-                  <Text style={styles.settingTitle}>
-                    {getNotificationTypeLabel(setting.type)}
-                  </Text>
-                </View>
-                <Switch
-                  value={setting.enabled}
-                  onValueChange={(enabled) => handleToggle(setting.id, enabled)}
-                  trackColor={{ false: "#767577", true: theme.colors.primary }}
-                  thumbColor={theme.colors.background.main}
-                />
-              </View>
-
-              {setting.enabled && (
-                <View style={styles.settingDetails}>
-                  <View style={styles.settingRow}>
-                    <Text style={styles.label}>通知時刻</Text>
-                    <TimePicker
-                      time={setting.time || "09:00"}
-                      onTimeChange={(time) =>
-                        handleTimeChange(setting.id, time)
-                      }
-                    />
-                  </View>
-
-                  <View style={styles.settingRow}>
-                    <Text style={styles.label}>通知頻度</Text>
-                    <View style={styles.frequencyButtons}>
-                      {FREQUENCY_OPTIONS.map((option) => (
-                        <TouchableOpacity
-                          key={option.value}
-                          style={[
-                            styles.frequencyButton,
-                            setting.frequency === option.value &&
-                              styles.frequencyButtonActive,
-                          ]}
-                          onPress={() =>
-                            handleFrequencyChange(setting.id, option.value)
-                          }
-                        >
-                          <Text
-                            style={[
-                              styles.frequencyButtonText,
-                              setting.frequency === option.value &&
-                                styles.frequencyButtonTextActive,
-                            ]}
-                          >
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  {setting.frequency === "custom" && (
-                    <View style={styles.customDaysContainer}>
-                      <Text style={styles.label}>カスタム日数</Text>
-                      <View style={styles.customDaysInput}>
-                        <Text style={styles.customDaysText}>
-                          {setting.customDays || 1}
-                        </Text>
-                        <Text style={styles.customDaysUnit}>日</Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-          ))}
-        </ScrollView>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>🔔 通知設定</Text>
+        <Text style={styles.subtitle}>ワクチンの接種予定日を通知でお知らせします</Text>
       </View>
-    </SafeAreaView>
+
+      <View style={styles.settingCard}>
+        <View style={styles.settingHeader}>
+          <View style={styles.titleContainer}>
+            <MaterialCommunityIcons
+              name="needle"
+              size={24}
+              color={theme.colors.primary}
+            />
+            <View style={styles.textContainer}>
+              <Text style={styles.settingTitle}>ワクチン通知</Text>
+              <Text style={styles.settingDescription}>
+                接種予定日の1週間前に通知します
+              </Text>
+            </View>
+          </View>
+          <Switch
+            value={vaccineNotificationEnabled}
+            onValueChange={handleVaccineNotificationToggle}
+            trackColor={{ false: "#767577", true: theme.colors.primary }}
+            thumbColor={
+              vaccineNotificationEnabled
+                ? theme.colors.background.main
+                : "#f4f3f4"
+            }
+          />
+        </View>
+        
+        {vaccineNotificationEnabled && (
+          <View style={styles.notificationInfo}>
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={16}
+              color={theme.colors.text.secondary}
+            />
+            <Text style={styles.infoText}>
+              登録されたすべてのワクチン記録に対して通知が送られます
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
   );
 }
 
+// グローバルにアクセスできる関数
+export const isVaccineNotificationEnabled = async (): Promise<boolean> => {
+  try {
+    const stored = await AsyncStorage.getItem(VACCINE_NOTIFICATION_KEY);
+    return stored ? JSON.parse(stored) : true; // デフォルトは有効
+  } catch (error) {
+    console.error('通知設定の読み込みエラー:', error);
+    return true;
+  }
+};
+
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: theme.colors.background.main,
-  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.secondary,
   },
-  scrollView: {
-    flex: 1,
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+  },
+  header: {
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.background.main,
+    alignItems: "center",
+    marginBottom: theme.spacing.md,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
     color: theme.colors.text.primary,
-    padding: theme.spacing.md,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+    marginTop: theme.spacing.xs,
+    textAlign: "center",
   },
   settingCard: {
     backgroundColor: theme.colors.background.main,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
     marginHorizontal: theme.spacing.md,
-    marginBottom: theme.spacing.md,
     ...theme.shadows.sm,
   },
-  header: {
+  settingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -200,66 +198,35 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+  },
+  textContainer: {
+    marginLeft: theme.spacing.sm,
+    flex: 1,
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: theme.colors.text.primary,
-    marginLeft: theme.spacing.sm,
   },
-  settingDetails: {
-    marginTop: theme.spacing.md,
-  },
-  settingRow: {
-    marginBottom: theme.spacing.md,
-  },
-  label: {
-    fontSize: 14,
+  settingDescription: {
+    fontSize: 12,
     color: theme.colors.text.secondary,
-    marginBottom: theme.spacing.xs,
+    marginTop: 2,
   },
-  frequencyButtons: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: theme.spacing.xs,
-  },
-  frequencyButton: {
-    backgroundColor: theme.colors.background.secondary,
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.md,
-    borderRadius: theme.borderRadius.full,
-    marginRight: theme.spacing.sm,
-    marginBottom: theme.spacing.sm,
-  },
-  frequencyButtonActive: {
-    backgroundColor: theme.colors.primary,
-  },
-  frequencyButtonText: {
-    color: theme.colors.text.primary,
-    fontSize: 14,
-  },
-  frequencyButtonTextActive: {
-    color: theme.colors.background.main,
-    fontWeight: "bold",
-  },
-  customDaysContainer: {
-    marginTop: theme.spacing.sm,
-  },
-  customDaysInput: {
+  notificationInfo: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.background.secondary,
+    marginTop: theme.spacing.md,
     padding: theme.spacing.sm,
+    backgroundColor: theme.colors.background.secondary,
     borderRadius: theme.borderRadius.sm,
-    width: 100,
   },
-  customDaysText: {
-    fontSize: 16,
-    color: theme.colors.text.primary,
-    marginRight: theme.spacing.xs,
-  },
-  customDaysUnit: {
-    fontSize: 14,
+  infoText: {
+    fontSize: 12,
     color: theme.colors.text.secondary,
+    marginLeft: theme.spacing.xs,
+    flex: 1,
+    lineHeight: 16,
   },
 });

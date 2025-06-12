@@ -1,12 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { VaccineRecord } from "../../types/medical";
 import theme from "../../constants/theme";
 
 interface VaccineManagementProps {
   vaccines: VaccineRecord[];
-  onNotificationToggle: (id: string, enabled: boolean) => void;
   onEditVaccine?: (vaccine: VaccineRecord) => void;
   onDeleteVaccine?: (vaccine: VaccineRecord) => void;
   onAddVaccine?: () => void;
@@ -14,7 +13,6 @@ interface VaccineManagementProps {
 
 export const VaccineManagement: React.FC<VaccineManagementProps> = ({
   vaccines,
-  onNotificationToggle,
   onEditVaccine,
   onDeleteVaccine,
   onAddVaccine,
@@ -78,16 +76,6 @@ export const VaccineManagement: React.FC<VaccineManagementProps> = ({
                   )}
                 </View>
               )}
-              <Switch
-                value={vaccine.notificationEnabled}
-                onValueChange={(value) => onNotificationToggle(vaccine.id, value)}
-                trackColor={{ false: "#767577", true: theme.colors.primary }}
-                thumbColor={
-                  vaccine.notificationEnabled
-                    ? theme.colors.background.main
-                    : "#f4f3f4"
-                }
-              />
             </View>
           </View>
           <View style={styles.dates}>
@@ -104,11 +92,6 @@ export const VaccineManagement: React.FC<VaccineManagementProps> = ({
               </Text>
             </View>
           </View>
-          {vaccine.notificationEnabled && (
-            <Text style={styles.notificationText}>
-              🔔 次回予定日の1週間前に通知が届きます
-            </Text>
-          )}
         </View>
       ))}
     </View>
@@ -181,12 +164,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.text.primary,
     fontWeight: "500",
-  },
-  notificationText: {
-    fontSize: 12,
-    color: theme.colors.text.secondary,
-    marginTop: theme.spacing.sm,
-    fontStyle: "italic",
   },
   headerActions: {
     flexDirection: "row",
