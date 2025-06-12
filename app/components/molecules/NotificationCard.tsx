@@ -163,8 +163,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   dismissButton: {
-    padding: theme.spacing.xs,
-    borderRadius: theme.borderRadius.xs,
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
     backgroundColor: theme.colors.background.secondary,
   },
   emptyContainer: {

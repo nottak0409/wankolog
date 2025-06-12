@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator, Text, Alert } from "react-native";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Constants from 'expo-constants';
 import { MedicalHistoryCard } from "../components/molecules/MedicalHistoryCard";
 import { VaccineManagement } from "../components/molecules/VaccineManagement";
 import { petService, medicalService } from "../database/services";

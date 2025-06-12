@@ -159,7 +159,7 @@ describe('NotificationCard', () => {
         }
       ];
 
-      const { UNSAFE_getByType } = render(
+      render(
         <NotificationCard notifications={vaccineNotification} onDismiss={mockOnDismiss} />
       );
 
@@ -179,7 +179,7 @@ describe('NotificationCard', () => {
         }
       ];
 
-      const { UNSAFE_getByType } = render(
+      render(
         <NotificationCard notifications={dailyRecordNotification} onDismiss={mockOnDismiss} />
       );
 
@@ -201,7 +201,7 @@ describe('NotificationCard', () => {
         }
       ];
 
-      const { getByTestId } = render(
+      render(
         <NotificationCard notifications={highPriorityNotification} onDismiss={mockOnDismiss} />
       );
 
@@ -221,7 +221,7 @@ describe('NotificationCard', () => {
         }
       ];
 
-      const { getByTestId } = render(
+      render(
         <NotificationCard notifications={mediumPriorityNotification} onDismiss={mockOnDismiss} />
       );
 

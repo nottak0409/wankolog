@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -18,7 +18,6 @@ import theme from "../constants/theme";
 export default function HistoryScreen() {
   const router = useRouter();
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
-  const [records, setRecords] = useState<Record[]>([]);
   const [recordsByDate, setRecordsByDate] = useState<RecordsByDate>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,8 +50,7 @@ export default function HistoryScreen() {
         setRecordsByDate(recordsByDateData);
         
         // 全記録も取得（フラットリスト用）
-        const allRecords = await recordService.getByPetId(pet.id);
-        setRecords(allRecords);
+        await recordService.getByPetId(pet.id);
       }
     } catch (error) {
       console.error("データの読み込みエラー:", error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, SafeAreaView, Alert, ActivityIndicator } from "react-native";
 import { Stack, useRouter, useFocusEffect } from "expo-router";
 import { PetProfile, PetProfileFormData } from "../types/profile";

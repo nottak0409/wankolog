@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Switch } from "react-native";
+import { View, Text, StyleSheet, Switch } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';

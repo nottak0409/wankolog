@@ -1,6 +1,5 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import Constants from 'expo-constants';
 
 // 通知の設定
 Notifications.setNotificationHandler({
@@ -68,7 +67,7 @@ export const notificationService = {
           body: notification.body,
           data: notification.data,
         },
-        trigger: notification.trigger,
+        trigger: null, // 即座に表示
       });
 
       console.log('通知をスケジュールしました:', {

@@ -97,7 +97,7 @@ const migrateDatabase = async (): Promise<void> => {
           await db.execAsync(`ALTER TABLE daily_records_new RENAME TO daily_records;`);
           
           console.log('Migrated daily_records table structure');
-        } catch (error) {
+        } catch {
           console.log('Migration already completed or table structure is up to date');
         }
       }
@@ -145,7 +145,7 @@ const migrateDatabase = async (): Promise<void> => {
             
             console.log('Removed notification_enabled column from vaccine_records');
           }
-        } catch (error) {
+        } catch {
           console.log('Vaccine records migration already completed or column does not exist');
         }
       }

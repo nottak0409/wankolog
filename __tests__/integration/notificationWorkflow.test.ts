@@ -184,7 +184,7 @@ describe('Notification Workflow Integration Tests', () => {
       await notificationItemService.dismissNotification(notificationId);
       
       // 却下機能のテスト
-      const isDismissed = await notificationItemService.isDismissed(notificationId);
+      await notificationItemService.isDismissed(notificationId);
       
       // 検証：却下機能が正しく動作することを確認
       // 実際のIDベースの却下動作をテスト
