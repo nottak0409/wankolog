@@ -17,9 +17,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Testing & Quality
 - `npm test` - Run Jest tests with watch mode
 - `npm run lint` - Run Expo linter
+- `npm run type-check` - Run TypeScript type checking
+- `npm run type-check:watch` - Run TypeScript type checking in watch mode
+- `npm run lint:ts` - Run TypeScript check + linter
+- `npm run validate` - Run full validation (type-check + lint + test)
 
 ### Project Management
 - `npm run reset-project` - Reset project to clean state (removes example code)
+
+## Claude Code Automation Settings
+
+**IMPORTANT**: All npm run commands are pre-approved for automatic execution. Claude Code should run any npm commands without asking for permission first, including:
+- Development servers (npm start, npm run ios, npm run android, npm run web)
+- Testing commands (npm test, npm run test:watch, npm run test:coverage)
+- Quality checks (npm run lint, npm run type-check, npm run validate)
+- Build and deployment commands
+- Any other npm run scripts defined in package.json
+
+This allows for efficient development workflow without interruption.
 
 ## Architecture
 
