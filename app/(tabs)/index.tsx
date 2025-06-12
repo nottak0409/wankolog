@@ -10,88 +10,65 @@ import NotificationBanner from "../components/molecules/NotificationBanner";
 import PetProfileCard from "../components/molecules/PetProfileCard";
 import type { Notification } from "../types/notification";
 import type { PetProfile } from "../types/profile";
-import { petService } from "../database/services";
+import { petService, recordService } from "../database/services";
 
 export default function HomeScreen() {
-  const [pets, setPets] = useState<PetProfile[]>([]);
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
+  const [todaySummary, setTodaySummary] = useState({
+    weight: 0,
+    mealsCount: 0,
+    poopsCount: 0,
+    exerciseMinutes: 0,
+  });
   const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
       loadPets();
-    }, [])
+    }, [loadPets])
   );
 
-  const loadPets = async () => {
+  const loadPets = useCallback(async () => {
     try {
       const allPets = await petService.getAll();
-      setPets(allPets);
       if (allPets.length > 0) {
         setCurrentPet(allPets[0]); // 最初のペットを選択
+        await loadTodayRecords(allPets[0].id);
       }
     } catch (error) {
       console.error('Failed to load pets:', error);
     }
+  }, []);
+
+  const loadTodayRecords = async (petId: string) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const todayRecords = await recordService.getByDate(petId, today);
+      
+      // 今日のサマリーを計算
+      const mealRecords = todayRecords.filter(r => r.type === 'meal');
+      const poopRecords = todayRecords.filter(r => r.type === 'poop');
+      const exerciseRecords = todayRecords.filter(r => r.type === 'exercise');
+      
+      setTodaySummary({
+        mealsCount: mealRecords.length,
+        poopsCount: poopRecords.length,
+        exerciseMinutes: exerciseRecords.length * 30, // 仮定: 1回30分
+        weight: 0, // 体重記録がある場合のみ表示
+      });
+    } catch (error) {
+      console.error('Failed to load today records:', error);
+    }
   };
 
-  // 仮データ（後でデータベースから取得）
-  const todaySummary = {
-    weight: 6.2,
-    mealsCount: 2,
-    poopsCount: 1,
-    exerciseMinutes: 30,
-  };
-
+  // 過去一週間のサマリー（実装可能だが今回は仮データを使用）
   const weekSummary = [
     {
-      date: "5/18",
-      weight: 6.1,
-      mealsCount: 2,
-      poopsCount: 1,
-      exerciseMinutes: 25,
-    },
-    {
-      date: "5/19",
-      weight: 6.2,
-      mealsCount: 2,
-      poopsCount: 1,
-      exerciseMinutes: 30,
-    },
-    {
-      date: "5/20",
-      weight: 6.2,
-      mealsCount: 2,
-      poopsCount: 2,
-      exerciseMinutes: 20,
-    },
-    {
-      date: "5/21",
-      weight: 6.3,
-      mealsCount: 2,
-      poopsCount: 1,
-      exerciseMinutes: 35,
-    },
-    {
-      date: "5/22",
-      weight: 6.2,
-      mealsCount: 2,
-      poopsCount: 1,
-      exerciseMinutes: 30,
-    },
-    {
-      date: "5/23",
-      weight: 6.2,
-      mealsCount: 2,
-      poopsCount: 1,
-      exerciseMinutes: 30,
-    },
-    {
-      date: "5/24",
-      weight: 6.2,
-      mealsCount: 2,
-      poopsCount: 1,
-      exerciseMinutes: 30,
+      date: "今日",
+      weight: 0,
+      mealsCount: todaySummary.mealsCount,
+      poopsCount: todaySummary.poopsCount,
+      exerciseMinutes: todaySummary.exerciseMinutes,
     },
   ];
 
@@ -134,6 +111,15 @@ export default function HomeScreen() {
       )}
       <DailySummaryCard {...todaySummary} />
       <WeeklySummaryCard data={weekSummary} />
+      
+      {/* 記録追加ボタン */}
+      <TouchableOpacity 
+        style={styles.addRecordButton}
+        onPress={() => router.push('/daily-record')}
+      >
+        <Text style={styles.addRecordButtonText}>記録を追加</Text>
+      </TouchableOpacity>
+      
       <NotificationBanner notifications={notifications} />
     </ScrollView>
   );
@@ -169,5 +155,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.text.secondary,
     fontSize: 14,
+  },
+  addRecordButton: {
+    backgroundColor: colors.primary,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.md,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  addRecordButtonText: {
+    color: colors.background.main,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
