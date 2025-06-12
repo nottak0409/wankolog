@@ -1,28 +1,80 @@
-import React from "react";
-import { StyleSheet, View, Text, Image, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Text, Image, ScrollView, ActivityIndicator } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { petService } from "../database/services";
+import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
 
 export default function PetProfileScreen() {
-  // 仮データ（後でReduxやAPI連携に差し替え）
-  const petData = {
-    name: "ポチ",
-    breed: "柴犬",
-    birthday: "2022年5月1日",
-    gender: "オス",
-    imageUrl:
-      "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80",
+  const [petData, setPetData] = useState<PetProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadPetData = async () => {
+    try {
+      setLoading(true);
+      const pets = await petService.getAll();
+      if (pets.length > 0) {
+        setPetData(pets[0]); // 最初のペットを表示
+      }
+    } catch (error) {
+      console.error("ペットデータの読み込みエラー:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadPetData();
+    }, [])
+  );
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatGender = (gender: "male" | "female") => {
+    return gender === "male" ? "オス" : "メス";
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>読み込み中...</Text>
+      </View>
+    );
+  }
+
+  if (!petData) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>ペットが登録されていません</Text>
+        <Text style={styles.emptySubText}>右上の編集ボタンから登録してください</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.header}>
           <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: petData.imageUrl }}
-              style={styles.image}
-              resizeMode="cover"
-            />
+            {petData.photo ? (
+              <Image
+                source={{ uri: petData.photo }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.noImageContainer}>
+                <Text style={styles.noImageText}>写真なし</Text>
+              </View>
+            )}
           </View>
           <Text style={styles.name}>{petData.name}</Text>
         </View>
@@ -34,12 +86,36 @@ export default function PetProfileScreen() {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>誕生日</Text>
-            <Text style={styles.value}>{petData.birthday}</Text>
+            <Text style={styles.value}>{formatDate(petData.birthday)}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>性別</Text>
-            <Text style={styles.value}>{petData.gender}</Text>
+            <Text style={styles.value}>{formatGender(petData.gender)}</Text>
           </View>
+          {petData.weight && (
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>体重</Text>
+              <Text style={styles.value}>{petData.weight}kg</Text>
+            </View>
+          )}
+          {petData.registrationNumber && (
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>登録番号</Text>
+              <Text style={styles.value}>{petData.registrationNumber}</Text>
+            </View>
+          )}
+          {petData.microchipNumber && (
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>マイクロチップ</Text>
+              <Text style={styles.value}>{petData.microchipNumber}</Text>
+            </View>
+          )}
+          {petData.notes && (
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>特記事項</Text>
+              <Text style={styles.value}>{petData.notes}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -99,5 +175,46 @@ const styles = StyleSheet.create({
   },
   editButton: {
     padding: theme.spacing.sm,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background.secondary,
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background.secondary,
+    padding: theme.spacing.lg,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: theme.colors.text.primary,
+    textAlign: "center",
+    marginBottom: theme.spacing.sm,
+  },
+  emptySubText: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+    textAlign: "center",
+  },
+  noImageContainer: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background.main,
+  },
+  noImageText: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
   },
 });

@@ -11,7 +11,6 @@ import theme from "../constants/theme";
 export default function PetProfileEditScreen() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [profile, setProfile] = useState<PetProfile | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
 
   const handleImageSelected = (result: { uri: string }) => {

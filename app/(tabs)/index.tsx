@@ -1,6 +1,6 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Text } from "react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import { colors, spacing } from "../constants/theme";
@@ -10,7 +10,7 @@ import NotificationBanner from "../components/molecules/NotificationBanner";
 import PetProfileCard from "../components/molecules/PetProfileCard";
 import type { Notification } from "../types/notification";
 import type { PetProfile } from "../types/profile";
-import { petService, recordService } from "../database/services";
+import { petService } from "../database/services";
 
 export default function HomeScreen() {
   const [pets, setPets] = useState<PetProfile[]>([]);

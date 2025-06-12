@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -19,11 +19,13 @@ import theme from "../../constants/theme";
 interface PetProfileFormProps {
   initialData?: Partial<PetProfileFormData>;
   onSubmit: (data: PetProfileFormData) => void;
+  isSubmitting?: boolean;
 }
 
 export const PetProfileForm: React.FC<PetProfileFormProps> = ({
   initialData,
   onSubmit,
+  isSubmitting = false,
 }) => {
   const [formData, setFormData] = useState<PetProfileFormData>({
     name: initialData?.name || "",
@@ -260,9 +262,44 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
         />
       )}
 
+      {/* 犬種選択モーダル */}
+      {showBreedPicker && (
+        <View style={styles.breedPickerContainer}>
+          <View style={styles.breedPickerModal}>
+            <View style={styles.breedPickerHeader}>
+              <Text style={styles.breedPickerTitle}>犬種を選択</Text>
+              <TouchableOpacity onPress={() => setShowBreedPicker(false)}>
+                <MaterialCommunityIcons name="close" size={24} color={theme.colors.text.primary} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.breedList}>
+              {MOCK_BREED_OPTIONS.map((breed) => (
+                <TouchableOpacity
+                  key={breed.id}
+                  style={styles.breedOption}
+                  onPress={() => {
+                    setFormData({ ...formData, breed: breed.name });
+                    setShowBreedPicker(false);
+                  }}
+                >
+                  <Text style={styles.breedOptionText}>{breed.name}</Text>
+                  <Text style={styles.breedGroupText}>{breed.group}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      )}
+
       {/* 保存ボタン */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>保存</Text>
+      <TouchableOpacity 
+        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]} 
+        onPress={handleSubmit}
+        disabled={isSubmitting}
+      >
+        <Text style={styles.submitButtonText}>
+          {isSubmitting ? "保存中..." : "保存"}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -370,5 +407,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  breedPickerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  breedPickerModal: {
+    backgroundColor: theme.colors.background.main,
+    width: "90%",
+    maxHeight: "80%",
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+  },
+  breedPickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.md,
+    paddingBottom: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.main,
+  },
+  breedPickerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: theme.colors.text.primary,
+  },
+  breedList: {
+    maxHeight: 400,
+  },
+  breedOption: {
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.main,
+  },
+  breedOptionText: {
+    fontSize: 16,
+    color: theme.colors.text.primary,
+    fontWeight: "500",
+  },
+  breedGroupText: {
+    fontSize: 12,
+    color: theme.colors.text.secondary,
+    marginTop: theme.spacing.xs,
   },
 });
