@@ -104,7 +104,7 @@ describe('NotificationCard', () => {
       );
 
       const notificationContent = getByText('テストメッセージ');
-      fireEvent.press(notificationContent.parent.parent);
+      fireEvent.press(notificationContent.parent?.parent!);
 
       await waitFor(() => {
         expect(mockRouter.push).not.toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('NotificationCard', () => {
       expect(closeIcons).toHaveLength(2);
       
       // 最初の却下ボタンの親要素をタップ
-      fireEvent.press(closeIcons[0].parent);
+      fireEvent.press(closeIcons[0].parent!);
 
       await waitFor(() => {
         expect(mockOnDismiss).toHaveBeenCalledWith('notification1');
@@ -135,8 +135,8 @@ describe('NotificationCard', () => {
 
       const closeIcons = UNSAFE_root.findAllByProps({ name: 'close' });
       
-      fireEvent.press(closeIcons[0].parent);
-      fireEvent.press(closeIcons[1].parent);
+      fireEvent.press(closeIcons[0].parent!);
+      fireEvent.press(closeIcons[1].parent!);
 
       await waitFor(() => {
         expect(mockOnDismiss).toHaveBeenCalledWith('notification1');

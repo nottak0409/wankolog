@@ -19,7 +19,7 @@ describe('Notification Workflow Integration Tests', () => {
     id: 'pet1',
     name: 'テスト犬',
     gender: 'male' as const,
-    birthday: '2020-01-01',
+    birthday: new Date('2020-01-01'),
     breed: '柴犬',
     created_at: new Date(),
     updated_at: new Date()

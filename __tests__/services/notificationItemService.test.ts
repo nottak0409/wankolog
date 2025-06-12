@@ -38,7 +38,7 @@ describe('notificationItemService', () => {
         id: 'pet1',
         name: 'テストペット',
         gender: 'male' as const,
-        birthday: '2020-01-01',
+        birthday: new Date('2020-01-01'),
         breed: 'テスト犬種',
         created_at: new Date(),
         updated_at: new Date()

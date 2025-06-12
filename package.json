@@ -11,7 +11,11 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "test:coverage": "jest --coverage",
-    "lint": "expo lint"
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "lint": "expo lint",
+    "lint:ts": "tsc --noEmit && expo lint",
+    "validate": "npm run type-check && npm run lint && npm run test"
   },
   "jest": {
     "preset": "jest-expo",
