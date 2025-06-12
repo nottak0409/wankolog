@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator, Text, Alert } from "react-native";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Constants from 'expo-constants';
 import { MedicalHistoryCard } from "../components/molecules/MedicalHistoryCard";
 import { VaccineManagement } from "../components/molecules/VaccineManagement";
 import { petService, medicalService } from "../database/services";
+import { notificationService } from "../services/notificationService";
 import { PetProfile } from "../types/profile";
 import theme from "../constants/theme";
 import type { VaccineRecord, MedicalRecord } from "../types/medical";
@@ -59,8 +61,11 @@ export default function MedicalHistoryScreen() {
 
   const handleNotificationToggle = async (vaccineId: string, enabled: boolean) => {
     try {
+      if (!currentPet) return;
+      
       await medicalService.updateVaccineRecord(vaccineId, {
-        notificationEnabled: enabled
+        notificationEnabled: enabled,
+        petName: currentPet.name,
       });
       await loadData(); // データを再読み込み
     } catch (error) {
@@ -134,6 +139,47 @@ export default function MedicalHistoryScreen() {
     router.push("/vaccine-record-edit");
   };
 
+  // デバッグ用: スケジュールされた通知を表示
+  const handleShowScheduledNotifications = async () => {
+    try {
+      await notificationService.logScheduledNotifications();
+      const notifications = await notificationService.getScheduledNotifications();
+      Alert.alert(
+        "スケジュールされた通知",
+        `${notifications.length}件の通知がスケジュールされています。\n\n詳細はコンソールを確認してください。`
+      );
+    } catch (error) {
+      console.error('通知の取得エラー:', error);
+    }
+  };
+
+  // デバッグ用: 既存のワクチン記録に対して通知を再スケジュール
+  const handleRescheduleAllNotifications = async () => {
+    if (!currentPet) return;
+    
+    try {
+      // 全ての通知をキャンセル
+      await notificationService.cancelAllNotifications();
+      
+      // 有効なワクチン記録に対して通知を再スケジュール
+      for (const vaccine of vaccineRecords) {
+        if (vaccine.notificationEnabled) {
+          await notificationService.scheduleVaccineNotification(
+            vaccine.id,
+            vaccine.type,
+            currentPet.name,
+            vaccine.nextDate
+          );
+        }
+      }
+      
+      Alert.alert('成功', '通知を再スケジュールしました');
+    } catch (error) {
+      console.error('通知の再スケジュールエラー:', error);
+      Alert.alert('エラー', '通知の再スケジュールに失敗しました');
+    }
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
@@ -167,6 +213,25 @@ export default function MedicalHistoryScreen() {
           onDeleteVaccine={handleDeleteVaccineRecord}
           onAddVaccine={handleAddVaccine}
         />
+        {/* デバッグ用ボタン（開発環境のみ） */}
+        {__DEV__ && (
+          <View style={styles.debugSection}>
+            <Text style={styles.debugTitle}>デバッグ機能</Text>
+            <TouchableOpacity
+              style={styles.debugButton}
+              onPress={handleShowScheduledNotifications}
+            >
+              <Text style={styles.debugButtonText}>スケジュールされた通知を表示</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.debugButton}
+              onPress={handleRescheduleAllNotifications}
+            >
+              <Text style={styles.debugButtonText}>通知を再スケジュール</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
         {/* スクロール領域の下部にパディングを追加 */}
         <View style={styles.bottomPadding} />
       </ScrollView>
@@ -242,5 +307,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.text.secondary,
     textAlign: "center",
+  },
+  debugSection: {
+    margin: theme.spacing.md,
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.background.main,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 2,
+    borderColor: '#ff6b6b',
+    borderStyle: 'dashed',
+  },
+  debugTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ff6b6b',
+    marginBottom: theme.spacing.sm,
+    textAlign: 'center',
+  },
+  debugButton: {
+    backgroundColor: '#ff6b6b',
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
+    marginBottom: theme.spacing.xs,
+  },
+  debugButtonText: {
+    color: theme.colors.background.main,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

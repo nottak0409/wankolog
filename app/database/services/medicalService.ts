@@ -1,5 +1,6 @@
 import { ensureDatabase } from '../init';
 import { MedicalRecord, VaccineRecord, Medication } from '../../types/medical';
+import { notificationService } from '../../services/notificationService';
 
 export const medicalService = {
   async createMedicalRecord(record: Omit<MedicalRecord, 'id'>): Promise<string> {
@@ -133,7 +134,7 @@ export const medicalService = {
   },
 
   // ワクチン関連
-  async createVaccineRecord(record: Omit<VaccineRecord, 'id'>): Promise<string> {
+  async createVaccineRecord(record: Omit<VaccineRecord, 'id'> & { petName?: string }): Promise<string> {
     const db = await ensureDatabase();
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     
@@ -150,6 +151,16 @@ export const medicalService = {
       ]
     );
     
+    // 通知が有効な場合、通知をスケジュール
+    if (record.notificationEnabled && record.petName) {
+      await notificationService.scheduleVaccineNotification(
+        id,
+        record.type,
+        record.petName,
+        record.nextDate
+      );
+    }
+    
     return id;
   },
 
@@ -163,10 +174,13 @@ export const medicalService = {
     return results.map(row => this.mapRowToVaccineRecord(row as any));
   },
 
-  async updateVaccineRecord(id: string, updates: Partial<Omit<VaccineRecord, 'id' | 'petId'>>): Promise<void> {
+  async updateVaccineRecord(id: string, updates: Partial<Omit<VaccineRecord, 'id' | 'petId'>> & { petName?: string }): Promise<void> {
     const db = await ensureDatabase();
     const fields: string[] = [];
     const values: any[] = [];
+    
+    // 既存のレコードを取得
+    const existingRecord = await this.getVaccineRecordById(id);
     
     if (updates.type !== undefined) {
       fields.push('type = ?');
@@ -192,10 +206,55 @@ export const medicalService = {
         values
       );
     }
+    
+    // 通知を再スケジュール
+    await this.rescheduleVaccineNotification(id, updates, existingRecord);
+  },
+
+  async rescheduleVaccineNotification(
+    id: string, 
+    updates: Partial<Omit<VaccineRecord, 'id' | 'petId'>> & { petName?: string },
+    existingRecord: VaccineRecord | null
+  ): Promise<void> {
+    if (!existingRecord) return;
+    
+    // 既存の通知をキャンセル
+    await notificationService.cancelVaccineNotification(id);
+    
+    // 更新された値を取得
+    const notificationEnabled = updates.notificationEnabled ?? existingRecord.notificationEnabled;
+    const nextDate = updates.nextDate ?? existingRecord.nextDate;
+    const type = updates.type ?? existingRecord.type;
+    
+    // 通知が有効で、ペット名が提供されている場合は新しい通知をスケジュール
+    if (notificationEnabled && updates.petName) {
+      await notificationService.scheduleVaccineNotification(
+        id,
+        type,
+        updates.petName,
+        nextDate
+      );
+    }
+  },
+
+  async getVaccineRecordById(id: string): Promise<VaccineRecord | null> {
+    const db = await ensureDatabase();
+    const result = await db.getFirstAsync(
+      `SELECT * FROM vaccine_records WHERE id = ?`,
+      [id]
+    );
+    
+    if (!result) return null;
+    
+    return this.mapRowToVaccineRecord(result as any);
   },
 
   async deleteVaccineRecord(id: string): Promise<void> {
     const db = await ensureDatabase();
+    
+    // 通知をキャンセル
+    await notificationService.cancelVaccineNotification(id);
+    
     await db.runAsync(`DELETE FROM vaccine_records WHERE id = ?`, [id]);
   },
 

@@ -7,21 +7,57 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Provider as PaperProvider } from "react-native-paper";
 import theme from "./constants/theme";
 import { initDatabase } from "./database/init";
+import { notificationService } from "./services/notificationService";
+import * as Notifications from 'expo-notifications';
 
 export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    const initDB = async () => {
+    const initApp = async () => {
       try {
+        // データベースの初期化
         console.log('Initializing database...');
         await initDatabase();
         console.log('Database initialized successfully');
+        
+        // 通知権限の要求
+        await notificationService.requestPermissions();
+        
+        // 通知リスナーの設定
+        const notificationListener = notificationService.addNotificationListener(
+          (notification) => {
+            console.log('通知を受信:', notification);
+          }
+        );
+        
+        const responseListener = notificationService.addNotificationResponseListener(
+          (response) => {
+            console.log('通知に対するユーザーのアクション:', response);
+            
+            // ワクチン通知の場合、履歴画面に遷移
+            if (response.notification.request.content.data?.type === 'vaccine_reminder') {
+              router.push('/history');
+            }
+          }
+        );
+        
+        // クリーンアップ関数を返す
+        return () => {
+          notificationListener && Notifications.removeNotificationSubscription(notificationListener);
+          responseListener && Notifications.removeNotificationSubscription(responseListener);
+        };
+        
       } catch (error) {
-        console.error('Failed to initialize database:', error);
+        console.error('Failed to initialize app:', error);
       }
     };
-    initDB();
+    
+    const cleanup = initApp();
+    
+    return () => {
+      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
+    };
   }, []);
 
   return (

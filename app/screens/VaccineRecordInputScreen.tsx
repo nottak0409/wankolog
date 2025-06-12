@@ -96,7 +96,10 @@ export default function VaccineRecordInputScreen() {
       
       if (editingRecord) {
         // 編集モード
-        await medicalService.updateVaccineRecord(editingRecord.id, formData);
+        await medicalService.updateVaccineRecord(editingRecord.id, {
+          ...formData,
+          petName: currentPet.name,
+        });
         Alert.alert("成功", "ワクチン記録を更新しました", [
           { text: "OK", onPress: () => router.back() }
         ]);
@@ -105,6 +108,7 @@ export default function VaccineRecordInputScreen() {
         await medicalService.createVaccineRecord({
           ...formData,
           petId: currentPet.id,
+          petName: currentPet.name,
         });
         Alert.alert("成功", "ワクチン記録を保存しました", [
           { text: "OK", onPress: () => router.back() }
