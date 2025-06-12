@@ -66,6 +66,16 @@ export const CalendarScreen = () => {
     }
   };
 
+  const handleEditRecord = (record: Record) => {
+    router.push({
+      pathname: "/daily-record",
+      params: { 
+        date: selectedDate,
+        recordId: record.id 
+      },
+    });
+  };
+
   const getMarkedDates = (): MarkedDates => {
     const dates: MarkedDates = {};
     Object.keys(recordsByDate).forEach((date) => {
@@ -99,7 +109,12 @@ export const CalendarScreen = () => {
           markedDates={getMarkedDates()}
         />
         <View style={styles.recordSection}>
-          <RecordList records={records} date={selectedDate} />
+          <RecordList 
+            records={records} 
+            date={selectedDate}
+            showEditButton={true}
+            onEditRecord={handleEditRecord}
+          />
           {selectedDate && currentPet && (
             <TouchableOpacity
               style={styles.addButton}

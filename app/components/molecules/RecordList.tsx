@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text, FlatList } from "react-native";
+import { StyleSheet, View, Text, FlatList, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import theme from "../../constants/theme";
 import { Record } from "../../types/record";
@@ -22,9 +22,11 @@ const getIconName = (type: Record["type"]) => {
 type RecordListProps = {
 	records: Record[];
 	date?: string;
+	showEditButton?: boolean;
+	onEditRecord?: (record: Record) => void;
 };
 
-export const RecordList = ({ records, date }: RecordListProps) => {
+export const RecordList = ({ records, date, showEditButton = false, onEditRecord }: RecordListProps) => {
 	const renderItem = ({ item }: { item: Record }) => (
 		<View style={styles.recordItem}>
 			<View style={styles.iconContainer}>
@@ -43,6 +45,18 @@ export const RecordList = ({ records, date }: RecordListProps) => {
 				</Text>
 				<Text style={styles.detail}>{item.detail}</Text>
 			</View>
+			{showEditButton && onEditRecord && (
+				<TouchableOpacity
+					style={styles.editButton}
+					onPress={() => onEditRecord(item)}
+				>
+					<Ionicons
+						name="pencil"
+						size={16}
+						color={theme.colors.primary}
+					/>
+				</TouchableOpacity>
+			)}
 		</View>
 	);
 
@@ -136,5 +150,11 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: theme.colors.text.secondary,
 		fontWeight: "normal",
+	},
+	editButton: {
+		padding: theme.spacing.xs,
+		borderRadius: theme.borderRadius.sm,
+		backgroundColor: theme.colors.background.main,
+		marginLeft: theme.spacing.sm,
 	},
 });

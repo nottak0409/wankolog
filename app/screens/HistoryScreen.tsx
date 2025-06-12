@@ -67,6 +67,16 @@ export default function HistoryScreen() {
     setRefreshing(false);
   };
 
+  const handleEditRecord = (record: Record, date: string) => {
+    router.push({
+      pathname: "/daily-record",
+      params: { 
+        date: date,
+        recordId: record.id 
+      },
+    });
+  };
+
   const getRecordIcon = (type: "meal" | "poop" | "exercise" | "weight") => {
     switch (type) {
       case "meal":
@@ -189,6 +199,16 @@ export default function HistoryScreen() {
                     </View>
                     <Text style={styles.recordDetail}>{record.detail}</Text>
                   </View>
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => handleEditRecord(record, date)}
+                  >
+                    <MaterialCommunityIcons
+                      name="pencil"
+                      size={18}
+                      color={theme.colors.primary}
+                    />
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
@@ -339,5 +359,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.text.secondary,
     fontWeight: "normal",
+  },
+  editButton: {
+    padding: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.background.secondary,
+    marginLeft: theme.spacing.sm,
   },
 });
