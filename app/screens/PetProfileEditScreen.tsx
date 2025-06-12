@@ -1,48 +1,49 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import { View, StyleSheet, ScrollView, SafeAreaView, Alert } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { PetProfile, PetProfileFormData } from "../types/profile";
 import { ProfileImagePicker } from "../components/molecules/ProfileImagePicker";
 import { PetProfileForm } from "../components/molecules/PetProfileForm";
+import { petService } from "../database/services";
 import theme from "../constants/theme";
 
-// TODO: 後でグローバルステートから取得するように変更
-const MOCK_PROFILE: PetProfile = {
-  id: "1",
-  name: "ポチ",
-  gender: "male",
-  birthday: new Date("2022-01-01"),
-  breed: "柴犬",
-  weight: 8.5,
-  photo: undefined,
-  registrationNumber: "R12345",
-  microchipNumber: "MC98765",
-  notes: "食物アレルギー（チキン）あり",
-};
 
 export default function PetProfileEditScreen() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [profile, setProfile] = useState<PetProfile>(MOCK_PROFILE);
+  const [profile, setProfile] = useState<PetProfile | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
 
   const handleImageSelected = (result: { uri: string }) => {
-    setProfile((prev) => ({
-      ...prev,
-      photo: result.uri,
-    }));
+    setSelectedImage(result.uri);
   };
 
   const handleSubmit = async (formData: PetProfileFormData) => {
     try {
       setIsSubmitting(true);
-      // TODO: APIリクエストの実装
-      // await updatePetProfile({ ...formData, photo: profile.photo });
+      
+      // フォームデータをPetProfileに変換
+      const petData: Omit<PetProfile, 'id'> = {
+        name: formData.name,
+        gender: formData.gender,
+        birthday: formData.birthday,
+        breed: formData.breed,
+        weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        registrationNumber: formData.registrationNumber,
+        microchipNumber: formData.microchipNumber,
+        photo: selectedImage,
+        notes: formData.notes,
+      };
 
-      // 成功したら前の画面に戻る
-      router.back();
+      // データベースに保存
+      await petService.create(petData);
+      
+      Alert.alert("成功", "ペットプロフィールを保存しました", [
+        { text: "OK", onPress: () => router.back() }
+      ]);
     } catch (error) {
-      // TODO: エラーハンドリング
-      console.error("プロフィール更新エラー:", error);
+      console.error("プロフィール保存エラー:", error);
+      Alert.alert("エラー", "保存に失敗しました。もう一度お試しください。");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,22 +67,23 @@ export default function PetProfileEditScreen() {
           contentContainerStyle={styles.content}
         >
           <ProfileImagePicker
-            currentImage={profile.photo}
+            currentImage={selectedImage}
             onImageSelected={handleImageSelected}
           />
 
           <PetProfileForm
             initialData={{
-              name: profile.name,
-              gender: profile.gender,
-              birthday: profile.birthday,
-              breed: profile.breed,
-              weight: profile.weight?.toString(),
-              registrationNumber: profile.registrationNumber,
-              microchipNumber: profile.microchipNumber,
-              notes: profile.notes,
+              name: "",
+              gender: "male",
+              birthday: new Date(),
+              breed: "",
+              weight: "",
+              registrationNumber: "",
+              microchipNumber: "",
+              notes: "",
             }}
             onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
           />
         </ScrollView>
       </View>

@@ -1,6 +1,8 @@
-import { StyleSheet, View, ScrollView } from "react-native";
+import { StyleSheet, View, ScrollView, TouchableOpacity } from "react-native";
 import { Text } from "react-native";
 import { useEffect, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { colors, spacing } from "../constants/theme";
 import DailySummaryCard from "../components/molecules/DailySummaryCard";
 import WeeklySummaryCard from "../components/molecules/WeeklySummaryCard";
@@ -13,10 +15,13 @@ import { petService, recordService } from "../database/services";
 export default function HomeScreen() {
   const [pets, setPets] = useState<PetProfile[]>([]);
   const [currentPet, setCurrentPet] = useState<PetProfile | null>(null);
+  const router = useRouter();
 
-  useEffect(() => {
-    loadPets();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadPets();
+    }, [])
+  );
 
   const loadPets = async () => {
     try {
@@ -119,7 +124,13 @@ export default function HomeScreen() {
           imageUrl={currentPet.photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80"}
         />
       ) : (
-        <Text style={styles.noPetText}>ペットを登録してください</Text>
+        <TouchableOpacity 
+          onPress={() => router.push('/pet-profile-edit')}
+          style={styles.noPetContainer}
+        >
+          <Text style={styles.noPetText}>ペットを登録してください</Text>
+          <Text style={styles.noPetSubText}>タップして新規登録</Text>
+        </TouchableOpacity>
       )}
       <DailySummaryCard {...todaySummary} />
       <WeeklySummaryCard data={weekSummary} />
@@ -137,10 +148,26 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
   },
+  noPetContainer: {
+    backgroundColor: colors.background.main,
+    borderRadius: 12,
+    padding: spacing.lg,
+    marginVertical: spacing.lg,
+    borderWidth: 2,
+    borderColor: colors.border.main,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+  },
   noPetText: {
     textAlign: 'center',
+    color: colors.text.primary,
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  noPetSubText: {
+    textAlign: 'center',
     color: colors.text.secondary,
-    fontSize: 16,
-    marginVertical: spacing.lg,
+    fontSize: 14,
   },
 });
