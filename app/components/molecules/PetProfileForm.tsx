@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -46,6 +46,22 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
     birthday: true,
     breed: true,
   });
+
+  // initialDataが変更された時にformDataを更新
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        gender: initialData.gender || "male",
+        birthday: initialData.birthday || new Date(),
+        breed: initialData.breed || "",
+        weight: initialData.weight || "",
+        registrationNumber: initialData.registrationNumber || "",
+        microchipNumber: initialData.microchipNumber || "",
+        notes: initialData.notes || "",
+      });
+    }
+  }, [initialData]);
 
   const validateForm = () => {
     const newValidation = {
