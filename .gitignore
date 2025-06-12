@@ -36,3 +36,8 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Android security files
+android/app/debug.keystore
+android/gradle.properties
+android/local.properties
