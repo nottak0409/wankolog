@@ -187,6 +187,32 @@ android/app/wankolog-release.keystore
 - パスワードも別途管理
 - 紛失するとアプリの更新ができなくなる
 
+## 📄 プライバシーポリシーの公開
+
+### GitHub Pagesでの公開手順
+
+1. **GitHubリポジトリの設定**
+   - リポジトリの Settings > Pages へ移動
+   - Source を "Deploy from a branch" に設定
+   - Branch を "main" に、フォルダを "/docs" に設定
+   - Save をクリック
+
+2. **公開URL**
+   ```
+   https://[あなたのGitHubユーザー名].github.io/wankolog/
+   ```
+
+3. **ファイル構成**
+   ```
+   docs/
+   └── index.html  # プライバシーポリシーのHTMLページ
+   privacy-policy.md  # Markdown版（リポジトリ内参照用）
+   ```
+
+4. **メールアドレスの設定**
+   - `docs/index.html` の「[あなたのメールアドレス]」を実際のメールアドレスに変更
+   - プライバシー保護のため、専用のメールアドレスを用意することを推奨
+
 ## 📆 今後の予定
 
 - MVP 開発（健康記録＋カレンダー＋通院履歴）✅
