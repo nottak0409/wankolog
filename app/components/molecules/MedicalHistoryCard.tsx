@@ -2,6 +2,8 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MedicalRecord } from "../../types/medical";
+import { NativeAd } from "../ads";
+import { AD_CONFIG } from "../../config/ads";
 import theme from "../../constants/theme";
 
 interface MedicalHistoryCardProps {
@@ -43,77 +45,84 @@ export const MedicalHistoryCard: React.FC<MedicalHistoryCardProps> = ({
   return (
     <View style={styles.container}>
       <Text style={styles.title}>通院・治療履歴</Text>
-      {recordsToDisplay.map((record) => (
-        <View key={record.id} style={styles.card}>
-          <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              <MaterialCommunityIcons
-                name={getIcon(record.type)}
-                size={24}
-                color={theme.colors.primary}
-              />
-            </View>
-            <View style={styles.dateContainer}>
-              <Text style={styles.date}>{formatDate(record.date)}</Text>
-              <Text style={styles.type}>
-                {record.type === "vaccine"
-                  ? "ワクチン接種"
-                  : record.type === "checkup"
-                  ? "健康診断"
-                  : "治療"}
-              </Text>
-            </View>
-            {(onEditRecord || onDeleteRecord) && (
-              <View style={styles.actionButtons}>
-                {onEditRecord && (
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => onEditRecord(record)}
-                  >
-                    <MaterialCommunityIcons
-                      name="pencil"
-                      size={18}
-                      color={theme.colors.primary}
-                    />
-                  </TouchableOpacity>
-                )}
-                {onDeleteRecord && (
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => onDeleteRecord(record)}
-                  >
-                    <MaterialCommunityIcons
-                      name="trash-can-outline"
-                      size={18}
-                      color={theme.colors.error}
-                    />
-                  </TouchableOpacity>
-                )}
+      {recordsToDisplay.map((record, index) => (
+        <React.Fragment key={record.id}>
+          <View style={styles.card}>
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name={getIcon(record.type)}
+                  size={24}
+                  color={theme.colors.primary}
+                />
               </View>
-            )}
-          </View>
-
-          <View style={styles.content}>
-            <Text style={styles.description}>{record.description}</Text>
-            {record.medications && record.medications.length > 0 && (
-              <View style={styles.medicationContainer}>
-                <Text style={styles.medicationTitle}>💊 処方薬</Text>
-                {record.medications.map((med) => (
-                  <Text key={med.id} style={styles.medication}>
-                    {med.name} ({med.dosage}) - {med.frequency}
-                  </Text>
-                ))}
-              </View>
-            )}
-            {record.nextAppointment && (
-              <View style={styles.nextAppointment}>
-                <Text style={styles.nextAppointmentText}>
-                  ⏰ 次回予約: {formatDate(record.nextAppointment)}
+              <View style={styles.dateContainer}>
+                <Text style={styles.date}>{formatDate(record.date)}</Text>
+                <Text style={styles.type}>
+                  {record.type === "vaccine"
+                    ? "ワクチン接種"
+                    : record.type === "checkup"
+                    ? "健康診断"
+                    : "治療"}
                 </Text>
               </View>
-            )}
+              {(onEditRecord || onDeleteRecord) && (
+                <View style={styles.actionButtons}>
+                  {onEditRecord && (
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => onEditRecord(record)}
+                    >
+                      <MaterialCommunityIcons
+                        name="pencil"
+                        size={18}
+                        color={theme.colors.primary}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  {onDeleteRecord && (
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => onDeleteRecord(record)}
+                    >
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={18}
+                        color={theme.colors.error}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+            </View>
+
+            <View style={styles.content}>
+              <Text style={styles.description}>{record.description}</Text>
+              {record.medications && record.medications.length > 0 && (
+                <View style={styles.medicationContainer}>
+                  <Text style={styles.medicationTitle}>💊 処方薬</Text>
+                  {record.medications.map((med) => (
+                    <Text key={med.id} style={styles.medication}>
+                      {med.name} ({med.dosage}) - {med.frequency}
+                    </Text>
+                  ))}
+                </View>
+              )}
+              {record.nextAppointment && (
+                <View style={styles.nextAppointment}>
+                  <Text style={styles.nextAppointmentText}>
+                    ⏰ 次回予約: {formatDate(record.nextAppointment)}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
+          
+          {/* ネイティブ広告を5件に1回挿入 */}
+          {(index + 1) % AD_CONFIG.NATIVE_AD_FREQUENCY === 0 && index < recordsToDisplay.length - 1 && (
+            <NativeAd />
+          )}
+        </React.Fragment>
       ))}
     </View>
   );

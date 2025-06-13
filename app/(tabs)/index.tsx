@@ -7,6 +7,7 @@ import DailySummaryCard from "../components/molecules/DailySummaryCard";
 import WeeklySummaryCard from "../components/molecules/WeeklySummaryCard";
 import PetProfileCard from "../components/molecules/PetProfileCard";
 import { NotificationCard } from "../components/molecules/NotificationCard";
+import { BannerAd } from "../components/ads";
 import type { PetProfile } from "../types/profile";
 import { petService, recordService } from "../database/services";
 import { DailySummary } from "../types/record";
@@ -230,6 +231,9 @@ export default function HomeScreen() {
       >
         <Text style={styles.addRecordButtonText}>記録を追加</Text>
       </TouchableOpacity>
+      
+      {/* バナー広告 */}
+      <BannerAd />
     </ScrollView>
   );
 }
