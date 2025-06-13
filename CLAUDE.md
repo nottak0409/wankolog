@@ -27,12 +27,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Claude Code Automation Settings
 
-**IMPORTANT**: All npm run commands are pre-approved for automatic execution. Claude Code should run any npm commands without asking for permission first, including:
-- Development servers (npm start, npm run ios, npm run android, npm run web)
-- Testing commands (npm test, npm run test:watch, npm run test:coverage)
-- Quality checks (npm run lint, npm run type-check, npm run validate)
-- Build and deployment commands
-- Any other npm run scripts defined in package.json
+**IMPORTANT**: The following commands and operations are pre-approved for automatic execution without asking for permission:
+
+### File Operations
+- **Read**: Any file within the project directory
+- **Write/Edit**: Any file within the project directory
+- **Create**: New files as needed for the project
+
+### Command Execution
+- **All npm commands**: Including but not limited to:
+  - Development servers (npm start, npm run ios, npm run android, npm run web)
+  - Testing commands (npm test, npm run test:watch, npm run test:coverage)  
+  - Quality checks (npm run lint, npm run type-check, npm run validate)
+  - Build and deployment commands
+  - Any other npm run scripts defined in package.json
+- **npx commands**: For Expo and other project tools (e.g., npx expo prebuild, npx expo run:android)
+- **Build commands**: ./gradlew commands for Android builds
+- **Git commands**: For version control operations within the project
 
 This allows for efficient development workflow without interruption.
 

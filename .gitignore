@@ -38,6 +38,6 @@ yarn-error.*
 app-example
 
 # Android security files
-android/app/debug.keystore
+android/app/*.keystore
 android/gradle.properties
 android/local.properties
