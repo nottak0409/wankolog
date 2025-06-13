@@ -113,19 +113,57 @@ const PRODUCTION_IDS = {
 2. ホーム画面で広告の表示/非表示を確認
 3. 履歴画面でネイティブ広告の表示/非表示を確認
 
+## RevenueCat 統合完了 ✅
+
+### Phase 1: RevenueCat + ローカルストレージ実装済み
+
+#### 実装された機能
+1. **RevenueCat SDK統合**
+   - `react-native-purchases` パッケージ
+   - 設定ファイル: `app/config/revenuecat.ts`
+
+2. **サブスクリプション管理**
+   - 強化された `subscriptionService.ts`
+   - ローカルキャッシュ + RevenueCat同期
+   - 24時間ごとの自動同期
+
+3. **プレミアム画面**
+   - `/premium-upgrade` 画面追加
+   - 料金プラン選択
+   - 購入・復元機能
+
+4. **設定画面統合**
+   - プレミアム状態表示
+   - アップグレードボタン
+
+#### 設定が必要な項目
+1. **RevenueCat ダッシュボード**
+   - アカウント作成: https://app.revenuecat.com
+   - アプリ登録
+   - API キー取得
+
+2. **App Store Connect / Google Play Console**
+   - アプリ内課金商品作成
+   - 商品ID設定
+
+3. **設定ファイル更新**
+   ```typescript
+   // app/config/revenuecat.ts
+   const REVENUECAT_CONFIG = {
+     IOS_API_KEY: 'your_ios_api_key',
+     ANDROID_API_KEY: 'your_android_api_key',
+   };
+   ```
+
 ## 今後の実装予定
 
-1. **RevenueCat の統合**
-   - App Store / Google Play のサブスクリプション管理
-   - 実際の課金処理
-
-2. **アップグレード画面**
-   - プレミアムプランの詳細表示
-   - 購入フロー
-
-3. **広告カスタマイズ**
+1. **広告カスタマイズ**
    - ペット関連広告のターゲティング
    - 広告配置の最適化
+
+2. **Phase 2: Firebase統合**
+   - ユーザー認証
+   - クラウドバックアップ
 
 ## 注意事項
 

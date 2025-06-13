@@ -37,6 +37,37 @@ jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }));
 
+// Mock react-native-purchases
+jest.mock('react-native-purchases', () => ({
+  configure: jest.fn(),
+  setLogLevel: jest.fn(),
+  logIn: jest.fn(),
+  getCustomerInfo: jest.fn().mockResolvedValue({
+    entitlements: {
+      active: {},
+    },
+  }),
+  getOfferings: jest.fn().mockResolvedValue({
+    current: null,
+    all: {},
+  }),
+  purchasePackage: jest.fn(),
+  restorePurchases: jest.fn(),
+  LOG_LEVEL: {
+    DEBUG: 'DEBUG',
+  },
+}));
+
+// Mock react-native-google-mobile-ads
+jest.mock('react-native-google-mobile-ads', () => ({
+  BannerAd: 'BannerAd',
+  NativeAd: 'NativeAd',
+  TestIds: {
+    BANNER: 'test-banner',
+    NATIVE: 'test-native',
+  },
+}));
+
 // Mock console methods for cleaner test output
 global.console = {
   ...console,

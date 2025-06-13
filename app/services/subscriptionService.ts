@@ -1,5 +1,7 @@
-// Subscription Service
-// This will integrate with RevenueCat in the future
+// Subscription Service with RevenueCat Integration
+import Purchases, { CustomerInfo, PurchasesOffering, PurchasesPackage } from 'react-native-purchases';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { REVENUE_CAT_CONFIG } from '../config/revenuecat';
 
 export interface SubscriptionStatus {
   isPremium: boolean;
@@ -60,6 +62,12 @@ export const FREE_TIER_LIMITS = {
   EXPORT_ENABLED: false,
 };
 
+// Storage keys
+const STORAGE_KEYS = {
+  SUBSCRIPTION_STATUS: 'subscription_status',
+  LAST_SYNC: 'last_subscription_sync',
+};
+
 class SubscriptionService {
   private static instance: SubscriptionService;
   private currentStatus: SubscriptionStatus = {
@@ -74,10 +82,92 @@ class SubscriptionService {
     return SubscriptionService.instance;
   }
 
+  // Initialize RevenueCat and sync subscription status
+  async initialize(): Promise<void> {
+    try {
+      // Load cached status first
+      await this.loadCachedStatus();
+      
+      // Sync with RevenueCat
+      await this.syncSubscriptionStatus();
+    } catch (error) {
+      console.error('Subscription service initialization failed:', error);
+    }
+  }
+
+  // Load subscription status from local storage
+  private async loadCachedStatus(): Promise<void> {
+    try {
+      const cached = await AsyncStorage.getItem(STORAGE_KEYS.SUBSCRIPTION_STATUS);
+      if (cached) {
+        const status = JSON.parse(cached);
+        // Convert string dates back to Date objects
+        if (status.expiresAt) {
+          status.expiresAt = new Date(status.expiresAt);
+        }
+        this.currentStatus = status;
+      }
+    } catch (error) {
+      console.error('Failed to load cached subscription status:', error);
+    }
+  }
+
+  // Sync subscription status with RevenueCat
+  private async syncSubscriptionStatus(): Promise<void> {
+    try {
+      const customerInfo = await Purchases.getCustomerInfo();
+      await this.updateStatusFromCustomerInfo(customerInfo);
+    } catch (error) {
+      console.error('Failed to sync subscription status:', error);
+    }
+  }
+
+  // Update status from RevenueCat customer info
+  private async updateStatusFromCustomerInfo(customerInfo: CustomerInfo): Promise<void> {
+    const premiumEntitlement = customerInfo.entitlements.active[REVENUE_CAT_CONFIG.ENTITLEMENT_ID];
+    
+    const newStatus: SubscriptionStatus = {
+      isPremium: !!premiumEntitlement,
+      tier: 'free',
+      expiresAt: undefined,
+      productId: undefined,
+    };
+
+    if (premiumEntitlement) {
+      newStatus.expiresAt = premiumEntitlement.expirationDate ? new Date(premiumEntitlement.expirationDate) : undefined;
+      newStatus.productId = premiumEntitlement.productIdentifier;
+      
+      // Determine tier based on product ID
+      if (premiumEntitlement.productIdentifier === REVENUE_CAT_CONFIG.PRODUCT_IDS.PREMIUM_YEARLY) {
+        newStatus.tier = 'premium_yearly';
+      } else {
+        newStatus.tier = 'premium_monthly';
+      }
+    }
+
+    // Update current status and save to storage
+    this.currentStatus = newStatus;
+    await this.saveStatusToStorage(newStatus);
+  }
+
+  // Save status to local storage
+  private async saveStatusToStorage(status: SubscriptionStatus): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.SUBSCRIPTION_STATUS, JSON.stringify(status));
+      await AsyncStorage.setItem(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
+    } catch (error) {
+      console.error('Failed to save subscription status:', error);
+    }
+  }
+
   // Get current subscription status
   async getSubscriptionStatus(): Promise<SubscriptionStatus> {
-    // TODO: Integrate with RevenueCat to get real subscription status
-    // For now, return mock free tier
+    // Check if we need to sync (every 24 hours or if no cache)
+    const shouldSync = await this.shouldSyncWithRevenueCat();
+    if (shouldSync) {
+      await this.syncSubscriptionStatus();
+    }
+    
     return this.currentStatus;
   }
 
@@ -136,26 +226,62 @@ class SubscriptionService {
     }
   }
 
-  // Mock purchase methods (to be replaced with RevenueCat)
-  async purchaseSubscription(tierId: string): Promise<boolean> {
-    // TODO: Implement actual purchase flow with RevenueCat
-    console.log(`Purchasing subscription: ${tierId}`);
-    
-    // Mock successful purchase
-    this.currentStatus = {
-      isPremium: true,
-      tier: tierId as any,
-      expiresAt: new Date(Date.now() + (tierId === 'premium_yearly' ? 365 : 30) * 24 * 60 * 60 * 1000),
-      productId: tierId
-    };
-    
-    return true;
+  // Check if sync is needed
+  private async shouldSyncWithRevenueCat(): Promise<boolean> {
+    try {
+      const lastSync = await AsyncStorage.getItem(STORAGE_KEYS.LAST_SYNC);
+      if (!lastSync) return true;
+      
+      const lastSyncDate = new Date(lastSync);
+      const now = new Date();
+      const hoursSinceSync = (now.getTime() - lastSyncDate.getTime()) / (1000 * 60 * 60);
+      
+      // Sync every 24 hours
+      return hoursSinceSync >= 24;
+    } catch {
+      return true; // Sync on error
+    }
   }
 
+  // Get available offerings from RevenueCat
+  async getOfferings(): Promise<PurchasesOffering[]> {
+    try {
+      const offerings = await Purchases.getOfferings();
+      return offerings.current ? [offerings.current] : Object.values(offerings.all);
+    } catch (error) {
+      console.error('Failed to get offerings:', error);
+      return [];
+    }
+  }
+
+  // Purchase subscription
+  async purchaseSubscription(packageToPurchase: PurchasesPackage): Promise<boolean> {
+    try {
+      const { customerInfo } = await Purchases.purchasePackage(packageToPurchase);
+      await this.updateStatusFromCustomerInfo(customerInfo);
+      
+      const isSuccess = this.currentStatus.isPremium;
+      console.log('Purchase result:', { success: isSuccess, status: this.currentStatus });
+      
+      return isSuccess;
+    } catch (error) {
+      console.error('Purchase failed:', error);
+      return false;
+    }
+  }
+
+  // Restore purchases
   async restorePurchases(): Promise<boolean> {
-    // TODO: Implement restore purchases with RevenueCat
-    console.log('Restoring purchases...');
-    return false;
+    try {
+      const customerInfo = await Purchases.restorePurchases();
+      await this.updateStatusFromCustomerInfo(customerInfo);
+      
+      console.log('Purchases restored:', this.currentStatus);
+      return this.currentStatus.isPremium;
+    } catch (error) {
+      console.error('Restore purchases failed:', error);
+      return false;
+    }
   }
 
   // Development helper: toggle premium status

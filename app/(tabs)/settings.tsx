@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { notificationService } from "../services/notificationService";
 import { petService, medicalService } from "../database/services";
@@ -11,6 +11,7 @@ import theme from "../constants/theme";
 const VACCINE_NOTIFICATION_KEY = 'vaccineNotificationEnabled';
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const [vaccineNotificationEnabled, setVaccineNotificationEnabled] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
@@ -146,7 +147,10 @@ export default function SettingsScreen() {
           </View>
         </View>
         {!isPremium && (
-          <TouchableOpacity style={styles.upgradeButton}>
+          <TouchableOpacity 
+            style={styles.upgradeButton}
+            onPress={() => router.push('/premium-upgrade')}
+          >
             <Text style={styles.upgradeButtonText}>アップグレード</Text>
           </TouchableOpacity>
         )}

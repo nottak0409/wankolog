@@ -8,6 +8,8 @@ import { Provider as PaperProvider } from "react-native-paper";
 import theme from "./constants/theme";
 import { initDatabase } from "./database/init";
 import { notificationService } from "./services/notificationService";
+import { subscriptionService } from "./services/subscriptionService";
+import { initializeRevenueCat } from "./config/revenuecat";
 import * as Notifications from 'expo-notifications';
 import { debugLog } from "./utils/debugUtils";
 
@@ -24,6 +26,15 @@ export default function RootLayout() {
         
         // 通知権限の要求
         await notificationService.requestPermissions();
+        
+        // RevenueCatの初期化（開発環境では設定なしでもクラッシュしない）
+        try {
+          await initializeRevenueCat();
+          await subscriptionService.initialize();
+          debugLog.log('RevenueCat初期化完了');
+        } catch (error) {
+          debugLog.log('RevenueCat初期化スキップ:', error);
+        }
         
         // 通知リスナーの設定
         const notificationListener = notificationService.addNotificationListener(

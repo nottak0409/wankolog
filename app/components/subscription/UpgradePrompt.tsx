@@ -22,6 +22,8 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
   const handleUpgrade = () => {
     onUpgrade?.();
     onClose();
+    // Navigate to premium upgrade screen
+    // This will be handled by the parent component
   };
 
   return (
