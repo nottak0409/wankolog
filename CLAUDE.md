@@ -101,3 +101,58 @@ Custom theme system in `app/constants/theme.ts` with:
 - Japanese UI text and content
 - No backend implementation yet (planned: Firebase/Supabase)
 - No global state management yet (considering Zustand/Jotai)
+
+## Monetization Implementation Design (TODO)
+
+### Technical Architecture for Freemium + Ads Model
+
+#### Subscription Management
+- **Payment Provider**: RevenueCat (cross-platform subscription management)
+- **Stores**: iOS App Store / Google Play Store in-app purchases
+- **Subscription tiers**: 
+  - Free (with ads, limited features)
+  - Premium Monthly (¥300-500)
+  - Premium Yearly (¥3,000-5,000 with discount)
+
+#### Ad Implementation
+- **Ad Provider**: Google AdMob
+- **Ad Types**:
+  - Banner ads (bottom of home screen)
+  - Native ads (in list views)
+- **Implementation Libraries**:
+  - `react-native-google-mobile-ads`
+  - Ad placement configuration in `app/config/ads.ts`
+
+#### Feature Gating Implementation
+```typescript
+// app/services/subscription.ts
+interface SubscriptionStatus {
+  isPremium: boolean;
+  expiresAt?: Date;
+  tier: 'free' | 'premium_monthly' | 'premium_yearly';
+}
+
+// Feature checks throughout the app:
+// - Pet limit check in pet creation flow
+// - Data retention limit in record queries
+// - Ad visibility toggle based on subscription
+// - Export functionality availability
+```
+
+#### Database Considerations
+- Add `subscription_status` table to track user subscriptions
+- Add `subscription_tier` field to users table
+- Implement data retention policies (30 days for free users)
+- Add indexes for efficient querying with date filters
+
+#### Key Implementation Tasks
+1. Integrate RevenueCat SDK for subscription management
+2. Set up AdMob account and configure ad units
+3. Implement feature flags system for premium features
+4. Add subscription management UI in settings
+5. Implement data retention policies and cleanup jobs
+6. Add analytics to track conversion rates
+7. Implement receipt validation on backend
+8. Add restore purchases functionality
+9. Create upgrade prompts at appropriate touchpoints
+10. Implement graceful degradation for expired subscriptions
