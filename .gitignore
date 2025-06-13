@@ -41,3 +41,25 @@ app-example
 android/app/*.keystore
 android/gradle.properties
 android/local.properties
+android/build/
+android/app/build/
+android/.gradle/
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/DerivedData/
+ios/.xcode.env.local
+
+# iOS Pods
+ios/Podfile.lock
+
+# React Native .cxx cache
+app/.cxx/
+.cxx/
+
+# Build artifacts
+build/
