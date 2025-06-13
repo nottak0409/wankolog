@@ -138,7 +138,7 @@ export const notificationItemService = {
           message,
           priority,
           actionType: 'navigate',
-          actionTarget: '/',
+          actionTarget: '/daily-record',
           createdAt: now
         };
       }
