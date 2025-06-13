@@ -127,7 +127,7 @@ describe('Notification Workflow Integration Tests', () => {
       expect(notifications).toHaveLength(1);
       expect(notifications[0].type).toBe('daily_record');
       expect(notifications[0].priority).toBe('high');
-      expect(notifications[0].actionTarget).toBe('/');
+      expect(notifications[0].actionTarget).toBe('/daily-record');
       expect(notifications[0].message).toContain('振り返り');
     });
 
