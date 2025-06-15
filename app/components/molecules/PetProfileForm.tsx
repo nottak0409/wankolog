@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   PetProfileFormData,
@@ -39,7 +40,6 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showBreedPicker, setShowBreedPicker] = useState(false);
   const [validation, setValidation] = useState<PetProfileValidation>({
     name: true,
     gender: true,
@@ -185,18 +185,27 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
         {/* 犬種 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>犬種 *</Text>
-          <TouchableOpacity
-            style={[styles.input, !validation.breed && styles.inputError]}
-            onPress={() => setShowBreedPicker(true)}
-          >
-            <Text
-              style={
-                formData.breed ? styles.breedText : styles.breedPlaceholder
-              }
+          <View style={[styles.pickerContainer, !validation.breed && styles.inputError]}>
+            <Picker
+              selectedValue={formData.breed}
+              style={styles.picker}
+              onValueChange={(itemValue) => {
+                if (itemValue !== '') {
+                  setFormData({ ...formData, breed: itemValue });
+                }
+              }}
+              mode="dropdown"
             >
-              {formData.breed || "犬種を選択"}
-            </Text>
-          </TouchableOpacity>
+              <Picker.Item label="犬種を選択してください" value="" />
+              {MOCK_BREED_OPTIONS.map((breed) => (
+                <Picker.Item 
+                  key={breed.id} 
+                  label={`${breed.name} (${breed.group})`} 
+                  value={breed.name} 
+                />
+              ))}
+            </Picker>
+          </View>
           {!validation.breed && (
             <Text style={styles.errorText}>犬種を選択してください</Text>
           )}
@@ -278,34 +287,6 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
         />
       )}
 
-      {/* 犬種選択モーダル */}
-      {showBreedPicker && (
-        <View style={styles.breedPickerContainer}>
-          <View style={styles.breedPickerModal}>
-            <View style={styles.breedPickerHeader}>
-              <Text style={styles.breedPickerTitle}>犬種を選択</Text>
-              <TouchableOpacity onPress={() => setShowBreedPicker(false)}>
-                <MaterialCommunityIcons name="close" size={24} color={theme.colors.text.primary} />
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={styles.breedList}>
-              {MOCK_BREED_OPTIONS.map((breed) => (
-                <TouchableOpacity
-                  key={breed.id}
-                  style={styles.breedOption}
-                  onPress={() => {
-                    setFormData({ ...formData, breed: breed.name });
-                    setShowBreedPicker(false);
-                  }}
-                >
-                  <Text style={styles.breedOptionText}>{breed.name}</Text>
-                  <Text style={styles.breedGroupText}>{breed.group}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      )}
 
       {/* 保存ボタン */}
       <TouchableOpacity 
@@ -403,14 +384,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text.primary,
   },
-  breedText: {
-    fontSize: 16,
-    color: theme.colors.text.primary,
-  },
-  breedPlaceholder: {
-    fontSize: 16,
-    color: theme.colors.text.secondary,
-  },
   submitButton: {
     backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
@@ -427,55 +400,15 @@ const styles = StyleSheet.create({
   submitButtonDisabled: {
     opacity: 0.6,
   },
-  breedPickerContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  breedPickerModal: {
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: theme.colors.border.main,
+    borderRadius: theme.borderRadius.sm,
     backgroundColor: theme.colors.background.main,
-    width: "90%",
-    maxHeight: "80%",
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.md,
+    overflow: 'hidden',
   },
-  breedPickerHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.md,
-    paddingBottom: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.main,
-  },
-  breedPickerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+  picker: {
+    height: 50,
     color: theme.colors.text.primary,
-  },
-  breedList: {
-    maxHeight: 400,
-  },
-  breedOption: {
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border.main,
-  },
-  breedOptionText: {
-    fontSize: 16,
-    color: theme.colors.text.primary,
-    fontWeight: "500",
-  },
-  breedGroupText: {
-    fontSize: 12,
-    color: theme.colors.text.secondary,
-    marginTop: theme.spacing.xs,
   },
 });
