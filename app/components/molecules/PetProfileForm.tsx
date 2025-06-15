@@ -401,14 +401,16 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   pickerContainer: {
-    borderWidth: 1,
-    borderColor: theme.colors.border.main,
+    backgroundColor: theme.colors.background.secondary,
     borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.background.main,
-    overflow: 'hidden',
+    paddingHorizontal: theme.spacing.sm,
+    minHeight: 56,
+    justifyContent: 'center',
   },
   picker: {
-    height: 50,
+    height: 56,
     color: theme.colors.text.primary,
+    marginHorizontal: -theme.spacing.sm,
+    marginVertical: -4,
   },
 });
