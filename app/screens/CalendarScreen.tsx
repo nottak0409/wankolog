@@ -206,11 +206,12 @@ const styles = StyleSheet.create({
   recordSection: {
     position: "relative",
     flex: 1,
+    paddingBottom: 80, // 追加ボタン分の余白を確保
   },
   addButton: {
     position: "absolute",
     right: theme.spacing.md,
-    bottom: theme.spacing.md,
+    bottom: theme.spacing.lg, // より下部に配置
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -218,6 +219,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     ...theme.shadows.md,
+    elevation: 8, // Android用の影を強化
   },
 });
 
