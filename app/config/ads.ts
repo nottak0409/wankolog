@@ -15,7 +15,7 @@ const __DEV__ = process.env.NODE_ENV !== 'production';
 // Export the appropriate IDs based on environment
 export const AD_UNIT_IDS = {
   BANNER_HOME: __DEV__ ? TestIds.BANNER : PRODUCTION_IDS.BANNER_HOME,
-  NATIVE_HISTORY: __DEV__ ? TestIds.NATIVE : PRODUCTION_IDS.NATIVE_HISTORY,
+  NATIVE_HISTORY: __DEV__ ? TestIds.BANNER : PRODUCTION_IDS.NATIVE_HISTORY, // Use BANNER for native ad testing
 };
 
 // Ad configuration
