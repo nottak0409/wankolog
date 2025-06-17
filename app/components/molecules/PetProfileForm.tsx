@@ -6,9 +6,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
+  Modal,
+  FlatList,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   PetProfileFormData,
@@ -40,12 +42,14 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showBreedPicker, setShowBreedPicker] = useState(false);
   const [validation, setValidation] = useState<PetProfileValidation>({
     name: true,
     gender: true,
     birthday: true,
     breed: true,
   });
+  const [isFormTouched, setIsFormTouched] = useState(false);
 
   // initialDataが変更された時にformDataを更新
   useEffect(() => {
@@ -75,6 +79,7 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
   };
 
   const handleSubmit = () => {
+    setIsFormTouched(true);
     if (validateForm()) {
       onSubmit(formData);
     }
@@ -98,13 +103,13 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
         <View style={styles.inputContainer}>
           <Text style={styles.label}>名前 *</Text>
           <TextInput
-            style={[styles.input, !validation.name && styles.inputError]}
+            style={[styles.input, isFormTouched && !validation.name && styles.inputError]}
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
             placeholder="名前を入力"
             placeholderTextColor={theme.colors.text.secondary}
           />
-          {!validation.name && (
+          {isFormTouched && !validation.name && (
             <Text style={styles.errorText}>名前を入力してください</Text>
           )}
         </View>
@@ -185,28 +190,15 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
         {/* 犬種 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>犬種 *</Text>
-          <View style={[styles.pickerContainer, !validation.breed && styles.inputError]}>
-            <Picker
-              selectedValue={formData.breed}
-              style={styles.picker}
-              onValueChange={(itemValue) => {
-                if (itemValue !== '') {
-                  setFormData({ ...formData, breed: itemValue });
-                }
-              }}
-              mode="dropdown"
-            >
-              <Picker.Item label="犬種を選択してください" value="" />
-              {MOCK_BREED_OPTIONS.map((breed) => (
-                <Picker.Item 
-                  key={breed.id} 
-                  label={`${breed.name} (${breed.group})`} 
-                  value={breed.name} 
-                />
-              ))}
-            </Picker>
-          </View>
-          {!validation.breed && (
+          <TouchableOpacity
+            style={[styles.input, isFormTouched && !validation.breed && styles.inputError]}
+            onPress={() => setShowBreedPicker(true)}
+          >
+            <Text style={formData.breed ? styles.selectedText : styles.placeholderText}>
+              {formData.breed || "犬種を選択"}
+            </Text>
+          </TouchableOpacity>
+          {isFormTouched && !validation.breed && (
             <Text style={styles.errorText}>犬種を選択してください</Text>
           )}
         </View>
@@ -298,6 +290,61 @@ export const PetProfileForm: React.FC<PetProfileFormProps> = ({
           {isSubmitting ? "保存中..." : "保存"}
         </Text>
       </TouchableOpacity>
+
+      {/* 犬種選択モーダル */}
+      <Modal
+        visible={showBreedPicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowBreedPicker(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowBreedPicker(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setShowBreedPicker(false)}>
+                <Text style={styles.modalCancelText}>キャンセル</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>犬種を選択</Text>
+              <TouchableOpacity onPress={() => setShowBreedPicker(false)}>
+                <Text style={styles.modalDoneText}>完了</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={MOCK_BREED_OPTIONS}
+              style={styles.breedList}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.breedItem,
+                    formData.breed === item.name && styles.breedItemSelected
+                  ]}
+                  onPress={() => {
+                    setFormData({ ...formData, breed: item.name });
+                    if (isFormTouched) {
+                      setValidation({ ...validation, breed: true });
+                    }
+                    setShowBreedPicker(false);
+                  }}
+                >
+                  <Text style={[
+                    styles.breedItemText,
+                    formData.breed === item.name && styles.breedItemTextSelected
+                  ]}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.breedGroupText}>{item.group}</Text>
+                </TouchableOpacity>
+              )}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 };
@@ -335,10 +382,10 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderWidth: 1,
-    borderColor: "red",
+    borderColor: theme.colors.error || "#ff6b6b",
   },
   errorText: {
-    color: "red",
+    color: theme.colors.error || "#ff6b6b",
     fontSize: 12,
     marginTop: theme.spacing.xs,
   },
@@ -400,17 +447,71 @@ const styles = StyleSheet.create({
   submitButtonDisabled: {
     opacity: 0.6,
   },
-  pickerContainer: {
-    backgroundColor: theme.colors.background.secondary,
-    borderRadius: theme.borderRadius.sm,
-    paddingHorizontal: theme.spacing.sm,
-    minHeight: 56,
-    justifyContent: 'center',
-  },
-  picker: {
-    height: 56,
+  selectedText: {
+    fontSize: 16,
     color: theme.colors.text.primary,
-    marginHorizontal: -theme.spacing.sm,
-    marginVertical: -4,
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: theme.colors.text.secondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background.main,
+    borderTopLeftRadius: theme.borderRadius.lg,
+    borderTopRightRadius: theme.borderRadius.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border.main,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  modalCancelText: {
+    fontSize: 16,
+    color: theme.colors.primary,
+  },
+  modalDoneText: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  breedList: {
+    maxHeight: 400,
+  },
+  breedItem: {
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.background.main,
+  },
+  breedItemSelected: {
+    backgroundColor: theme.colors.background.secondary,
+  },
+  breedItemText: {
+    fontSize: 16,
+    color: theme.colors.text.primary,
+  },
+  breedItemTextSelected: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  breedGroupText: {
+    fontSize: 12,
+    color: theme.colors.text.secondary,
+    marginTop: theme.spacing.xs,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: theme.colors.border.main,
   },
 });
