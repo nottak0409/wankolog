@@ -78,6 +78,9 @@ export const VaccineManagement: React.FC<VaccineManagementProps> = ({
               )}
             </View>
           </View>
+          {vaccine.hospitalName && (
+            <Text style={styles.hospitalName}>{vaccine.hospitalName}</Text>
+          )}
           <View style={styles.dates}>
             <View style={styles.dateItem}>
               <Text style={styles.dateLabel}>前回接種日</Text>
@@ -146,6 +149,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: theme.colors.text.primary,
+  },
+  hospitalName: {
+    fontSize: 14,
+    color: theme.colors.text.secondary,
+    marginTop: theme.spacing.xs,
+    fontStyle: "italic",
   },
   dates: {
     marginTop: theme.spacing.sm,

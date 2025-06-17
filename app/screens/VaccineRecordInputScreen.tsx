@@ -29,6 +29,7 @@ export default function VaccineRecordInputScreen() {
     type: "",
     lastDate: new Date(),
     nextDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1年後
+    hospitalName: "",
   });
 
   const [showLastDatePicker, setShowLastDatePicker] = useState(false);
@@ -70,6 +71,7 @@ export default function VaccineRecordInputScreen() {
           type: record.type,
           lastDate: record.lastDate,
           nextDate: record.nextDate,
+          hospitalName: record.hospitalName || "",
         });
       }
     } catch (error) {
@@ -161,6 +163,18 @@ export default function VaccineRecordInputScreen() {
           value={formData.type}
           onChangeText={(text) => setFormData({ ...formData, type: text })}
           placeholder="例: 混合ワクチン、狂犬病ワクチン"
+          placeholderTextColor={theme.colors.text.secondary}
+        />
+      </View>
+
+      {/* 病院名 */}
+      <View style={styles.typeSection}>
+        <Text style={styles.sectionTitle}>病院名</Text>
+        <TextInput
+          style={styles.typeInput}
+          value={formData.hospitalName}
+          onChangeText={(text) => setFormData({ ...formData, hospitalName: text })}
+          placeholder="例: ○○動物病院"
           placeholderTextColor={theme.colors.text.secondary}
         />
       </View>
