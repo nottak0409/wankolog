@@ -140,14 +140,15 @@ export const medicalService = {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     
     await db.runAsync(
-      `INSERT INTO vaccine_records (id, pet_id, type, last_date, next_date)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO vaccine_records (id, pet_id, type, last_date, next_date, hospital_name)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         id,
         record.petId,
         record.type,
         record.lastDate.toISOString().split('T')[0],
-        record.nextDate.toISOString().split('T')[0]
+        record.nextDate.toISOString().split('T')[0],
+        record.hospitalName || null
       ]
     );
     
@@ -191,6 +192,10 @@ export const medicalService = {
     if (updates.nextDate !== undefined) {
       fields.push('next_date = ?');
       values.push(updates.nextDate.toISOString().split('T')[0]);
+    }
+    if (updates.hospitalName !== undefined) {
+      fields.push('hospital_name = ?');
+      values.push(updates.hospitalName || null);
     }
     
     if (fields.length > 0) {
@@ -276,7 +281,8 @@ export const medicalService = {
       petId: row.pet_id,
       type: row.type,
       lastDate: new Date(row.last_date),
-      nextDate: new Date(row.next_date)
+      nextDate: new Date(row.next_date),
+      hospitalName: row.hospital_name || undefined
     };
   }
 };

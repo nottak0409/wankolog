@@ -2,7 +2,7 @@ import * as SQLite from 'expo-sqlite';
 import { debugLog } from '../utils/debugUtils';
 
 const DATABASE_NAME = 'wankolog.db';
-const CURRENT_SCHEMA_VERSION = 3; // notification_enabled列を削除
+const CURRENT_SCHEMA_VERSION = 4; // vaccine_recordsにhospital_name列を追加
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -151,6 +151,22 @@ const migrateDatabase = async (): Promise<void> => {
         }
       }
 
+      // バージョン3→4: vaccine_recordsテーブルにhospital_nameカラムを追加
+      if (currentVersion < 4) {
+        try {
+          // カラムが存在するかチェック
+          const tableInfo = await db.getAllAsync(`PRAGMA table_info(vaccine_records)`);
+          const hasHospitalNameColumn = tableInfo.some((col: any) => col.name === 'hospital_name');
+          
+          if (!hasHospitalNameColumn) {
+            await db.execAsync(`ALTER TABLE vaccine_records ADD COLUMN hospital_name TEXT;`);
+            debugLog.db('Added hospital_name column to vaccine_records');
+          }
+        } catch (error) {
+          debugLog.db('Hospital name column migration error:', error);
+        }
+      }
+
       // バージョンを更新
       await db.execAsync(`
         INSERT OR REPLACE INTO schema_version (version) VALUES (${CURRENT_SCHEMA_VERSION});
@@ -229,6 +245,7 @@ const createTables = async (): Promise<void> => {
       type TEXT NOT NULL,
       last_date TEXT NOT NULL,
       next_date TEXT NOT NULL,
+      hospital_name TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
