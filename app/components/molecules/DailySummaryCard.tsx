@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import theme from "../../constants/theme";
 import { getJapanToday } from "../../utils/dateUtils";
@@ -44,7 +44,7 @@ const DailySummaryCard: React.FC<DailySummaryCardProps> = ({
           <Text style={styles.value}>{mealsCount}回</Text>
         </View>
         <View style={styles.item}>
-          <Ionicons name="fitness" size={24} color={theme.colors.primary} />
+          <MaterialCommunityIcons name="toilet" size={24} color={theme.colors.primary} />
           <Text style={styles.label}>うんち</Text>
           <Text style={styles.value}>{poopsCount}回</Text>
         </View>

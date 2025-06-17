@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, FlatList, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "../../constants/theme";
 import { Record } from "../../types/record";
 
@@ -9,7 +9,7 @@ const getIconName = (type: Record["type"]) => {
 		case "meal":
 			return "restaurant";
 		case "poop":
-			return "nutrition";
+			return "toilet";
 		case "exercise":
 			return "walk";
 		case "weight":
@@ -27,15 +27,24 @@ type RecordListProps = {
 };
 
 export const RecordList = ({ records, date, showEditButton = false, onEditRecord }: RecordListProps) => {
-	const renderItem = ({ item }: { item: Record }) => (
-		<View style={styles.recordItem}>
-			<View style={styles.iconContainer}>
-				<Ionicons
-					name={getIconName(item.type)}
-					size={24}
-					color={theme.colors.primary}
-				/>
-			</View>
+	const renderItem = ({ item }: { item: Record }) => {
+		return (
+			<View style={styles.recordItem}>
+				<View style={styles.iconContainer}>
+					{item.type === "poop" ? (
+						<MaterialCommunityIcons
+							name="toilet"
+							size={24}
+							color={theme.colors.primary}
+						/>
+					) : (
+						<Ionicons
+							name={getIconName(item.type) as any}
+							size={24}
+							color={theme.colors.primary}
+						/>
+					)}
+				</View>
 			<View style={styles.recordContent}>
 				<Text style={styles.time}>
 					{item.time}
@@ -58,7 +67,8 @@ export const RecordList = ({ records, date, showEditButton = false, onEditRecord
 				</TouchableOpacity>
 			)}
 		</View>
-	);
+		);
+	};
 
 	const formatDate = (date?: string) => {
 		if (!date) return "今日の記録";
